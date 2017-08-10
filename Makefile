@@ -75,6 +75,7 @@ endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
 endif
+	@ssh-keygen -f Dockerfile_id_rsa -P ""
 
 
 install: welcome install-dependencies build-docker-image ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
