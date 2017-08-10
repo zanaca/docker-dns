@@ -53,7 +53,7 @@ ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), 
 	@#sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-dnsmasq.plist
 endif
 	@brew install `cat requirements.apt` -y
-	@[ shuttle ] || sudo pip install sshuttle
+	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
@@ -64,7 +64,7 @@ endif
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
 	@#ssh -D "*:2201" -f -C -q -N root@127.0.0.1 -p $(SSH_PORT) -i Dockerfile_id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
 	@# sshuttle will run  in a daemon, so docker will no be running to discover it network IP
-	@sshuttle -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
+	@sudo sshuttle -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
 
 else
 install-dependencies:
