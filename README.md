@@ -25,7 +25,7 @@ By default it will enable create that hosts: *ns0.docker* and *ns0.$YOUR_HOSTNAM
 
 ### Options
 In `make install` you can pass some variables to change how setup is done. You can change the working domain for example.
- - *tld*: working domain. It can be any domain name but the domains designed to work in loopback network. For example `yourmachine.dev` will create names like `CONTAINER_NAME.yourmachine.dev`. You can have `docker.yourdomain_real_domain.com` as well so it will create names like `CONTAINER_NAME.docker.yourdomain_real_domain.com . Default value: `docker`;
+ - *tld*: working domain. It can be any domain name but the domains designed to work in loopback network. For example `yourmachine.dev` will create names like `CONTAINER_NAME.yourmachine.dev`. You can have `docker.your_real_domain.com` as well so it will create names like `CONTAINER_NAME.docker.your_real_domain.com . Default value: `docker`;
 
  - *tag*: Tag name for the created docker image. It should be changed only if you have a name conflict  Default value: `ns0`
 
