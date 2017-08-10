@@ -35,6 +35,9 @@ Example:
      `make install tld=mymachine.dev tag=dns`
 Will create a docker image name *dns* and it will be available as *dns.mymachine.dev* so you could run `dig www.google.com @dns.mymachine.dev`
 
+### Requirements
+ - [Docker](https://www.docker.com/docker-ubuntu) or [Docker for mac](https://www.docker.com/docker-mac)
+ - [Homebrew](https://brew.sh/) for macOS machines
 
 
 ### Tested enviroment
