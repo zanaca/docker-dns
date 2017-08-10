@@ -19,7 +19,7 @@ By default it will enable create that hosts: *ns0.docker* and *ns0.$YOUR_HOSTNAM
 
  - `make show-domain` - Show the working domain of your installation;
 
- - `make tunnel` - *WORKS ONLY IN macOS* Create a tunnel to route all traffic to you docker containers. Just available in macOS, on linux you don't need that feature.
+ - `make tunnel` - Create a tunnel to route all traffic to you docker containers. Available only in macOS, on linux you don't need that feature.
 
 
 
