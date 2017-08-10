@@ -50,8 +50,7 @@ Will create a docker image name *dns* and it will be available as *dns.docker.de
 
 ### Troubleshooting
 
-If you are using macOS, on restart, you will loose access to your containers because by macOS network design docker is unable to create a interface, so you need to create a tunnel to route all traffic to docker network through it. To recreate that tunnel you must run:
-`make tunnel`
+If you are using macOS, on restart, you will loose access to your containers. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `make tunnel` from docker-dns folder
 
 
 ### License
