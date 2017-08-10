@@ -1,6 +1,6 @@
-# docker DNS
+# Docker DNS
 
-Docker DNS creates a container that works as a DNS for docker containers in you machine. Every running container will be accessible by `$container_name.docker` for example. You could inform you own domain if you like. Your domains are available *inside* and *outside* docker, but just for you machine. For example, you could access *http://nginx.docker* from your browser window OR from inside a container. 
+Docker DNS creates a container that works as a DNS for docker containers in you machine. Every running container will be accessible by `$container_name.docker` for example. You could inform you own domain if you like. Your domains are available *inside* and *outside* docker, but just for you machine. For example, you could access *http://nginx.docker* from your browser window OR from inside a container.
 
 It was created to allow you to work in a container as if was a "real" server setup. You will have access to all ports/services inside the container without need to expose all the ports. You can publish ports as well to access it like the old way. E.g.: 127.0.0.1:8080 -> container_ip:80
 
@@ -13,13 +13,13 @@ By default it will enable create that hosts: *ns0.docker* and *ns0.$YOUR_HOSTNAM
 
 
 ### Supported commands
- - `make install` - Sets up all environment;
+ - `make install` - Set up all environment;
 
- - `make uninstall` - Removes configuration files from your system;
+ - `make uninstall` - Remove configuration files from your system;
 
  - `make show-domain` - Show the working domain of your installation;
 
- - `make tunnel` - *WORKS ONLY IN macOS* Creates a tunnel to route all traffic to you docker containers. On linux you do not need that feature.
+ - `make tunnel` - *WORKS ONLY IN macOS* Create a tunnel to route all traffic to you docker containers. Just available in macOS, on linux you don't need that feature.
 
 
 
@@ -33,7 +33,7 @@ In `make install` you can pass some variables to change how setup is done. You c
 
 Example:
      `make install tld=mymachine.dev tag=dns`
-Will create a docker image name *dns* and it will be available as *dns.mymachine.dev* so you could run `dig www.google.com @dns.mymachine.dev`
+Will create a docker image name *dns* and it will be available as *dns.zanaca.dev* so you could run `dig www.google.com @dns.zanaca.dev`
 
 ### Requirements
  - [Docker](https://www.docker.com/docker-ubuntu) or [Docker for mac](https://www.docker.com/docker-mac)
