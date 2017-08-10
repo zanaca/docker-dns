@@ -54,6 +54,11 @@ If you are using macOS, on restart, you will loose access to your containers bec
 `make tunnel`
 
 
+### License
+
+[MIT](LICENSE.md)
+
+
 ### Thanks
 
-Thanks to https://github.com/apenwarr/sshuttle for the great poor's man VPN service! An easy way to setup tunneling on macOS
+- Thanks to https://github.com/apenwarr/sshuttle for the great poor's man VPN service! An easy way to setup tunneling on macOS
