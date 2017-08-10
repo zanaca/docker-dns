@@ -32,8 +32,8 @@ In `make install` you can pass some variables to change how setup is done. You c
  - *name*: Running container name. Default value: the *tag* name
 
 Example:
-     `make install tld=mymachine.dev tag=dns`
-Will create a docker image name *dns* and it will be available as *dns.zanaca.dev* so you could run `dig www.google.com @dns.zanaca.dev`
+     `make install tld=docker.dev tag=dns`
+Will create a docker image name *dns* and it will be available as *dns.docker.dev* so you could run `dig www.google.com @dns.docker.dev`
 
 ### Requirements
  - [Docker](https://www.docker.com/docker-ubuntu) or [Docker for mac](https://www.docker.com/docker-mac)
