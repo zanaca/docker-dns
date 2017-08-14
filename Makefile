@@ -58,7 +58,7 @@ endif
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
-	@ssh-keygen -f Dockerfile_id_rsa -P ""
+	@[ Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
@@ -77,7 +77,7 @@ endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
 endif
-	@ssh-keygen -f Dockerfile_id_rsa -P ""
+	@[ Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
 
 install: welcome install-dependencies build-docker-image ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
