@@ -52,7 +52,7 @@ ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), 
 	@#sudo sh -c "cp conf/com.zanaca.dockerdns-dnsmasq.plist /Library/LaunchDaemons/"
 	@#sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-dnsmasq.plist
 endif
-	@brew install `cat requirements.apt` -y
+	@brew install `cat requirements.apt | grep net-tools -v` -y
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
@@ -75,7 +75,7 @@ ifneq ($(shell grep $(IP) /etc/resolv.conf), nameserver $(IP))
 		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@echo "nameserver $(IP)" | sudono tee /etc/resolver/$(TLD)
 endif
 	@[ -f Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
@@ -96,10 +96,10 @@ install: welcome install-dependencies build-docker-image ## Setup DNS container 
 	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker. E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
 ifeq ($(UNAME), Darwin)
-	@sed -i s/\s#bind-interfaces// $(DNSMASQ_LOCAL_CONF)
-	@sed -i s/interface=docker.*// $(DNSMASQ_LOCAL_CONF)
-	@cat ~/.ssh/known_hosts | grep 127.0.0.1]:$(SSH_PORT) -v > ~/.ssh/known_hosts_dd && mv ~/.ssh/known_hosts_dd ~/.ssh/known_hosts
-	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 >> ~/.ssh/known_hosts
+	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
+	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
+	@sudo cat `echo ~root`/.ssh/known_hosts | grep 127.0.0.1]:$(SSH_PORT) -v > /tmp/known_hosts_dd && sudo mv /tmp/known_hosts_dd `echo ~root`/.ssh/known_hosts
+	@sleep 2 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 >> `echo ~root`/.ssh/known_hosts
 	@make tunnel & > /dev/null
 endif
 
