@@ -72,15 +72,17 @@ install-dependencies:
 	@sudo apt-get install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) /etc/resolv.conf), nameserver $(IP))
 		@echo "nameserver $(IP)" | sudo tee -a /etc/resolv.conf;
-		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 endif
-	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudono tee /etc/resolver/$(TLD)
+	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; fi
+	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
+	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
+	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
 endif
 	@[ -f Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
 
-install: welcome install-dependencies build-docker-image ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
+install: welcome build-docker-image install-dependencies## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
 	@if [ `docker container inspect $(DOCKER_CONTAINER_NAME) 2> /dev/null | head -n1` = "[" ]; then \
 		docker stop $(DOCKER_CONTAINER_NAME) > /dev/null && docker rm $(DOCKER_CONTAINER_NAME) > /dev/null; \
 	fi
@@ -116,8 +118,12 @@ ifeq ($(UNAME), Darwin)
 endif
 
 show-domain: ## View the docker domain installed
+ifeq ('$(docker images | grep $tag)', '')
+	@echo "docker-dns not installed! Please install first"
+else
 	@echo Working domain:
-	@docker inspect ns0 | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+	@docker inspect $(tag) | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+endif
 
 help: welcome
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep ^help -v | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
