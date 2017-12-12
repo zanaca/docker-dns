@@ -72,10 +72,11 @@ install-dependencies:
 	@sudo apt-get install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) /etc/resolv.conf), nameserver $(IP))
 		@echo "nameserver $(IP)" | sudo tee -a /etc/resolv.conf;
+		@mkdir -p /etc/resolvconf/resolv.conf.d > /dev/null
 		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudono tee /etc/resolver/$(TLD)
+	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
 endif
 	@[ -f Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
@@ -116,8 +117,12 @@ ifeq ($(UNAME), Darwin)
 endif
 
 show-domain: ## View the docker domain installed
+ifeq ('$(docker images | grep $tag)', '')
+	@echo "docker-dns not installed! Please install first"
+else
 	@echo Working domain:
-	@docker inspect ns0 | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+	@docker inspect $(tag) | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+endif
 
 help: welcome
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep ^help -v | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
