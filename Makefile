@@ -95,7 +95,8 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 		sleep 2; \
 	done;
 	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
-	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker. E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
+	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
+	@echo PS: Make sure your active DNS is $(tail -n1 /etc/resolv.conf | cut -d\\  -f2)
 ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
@@ -109,7 +110,7 @@ uninstall: welcome ## Remove all files from docker-dns
 	@docker stop $(DOCKER_CONTAINER_NAME)
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
 	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json
-	@if [ `grep ${IP} /etc/resolv.conf` ]; then grep -v "nameserver ${IP}" /etc/resolv.conf > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /tmp/resolv.conf; fi
+	@grep -v "nameserver ${IP}" /etc/resolv.conf > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /tmp/resolv.conf;
 	@#if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tuntap-up.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tuntap-up.plist; fi
 	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
