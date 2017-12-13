@@ -41,6 +41,7 @@ welcome:
 	@printf "\033[m\n"
 
 build-docker-image:
+	@[ -f Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 	@docker build . -t $(DOCKER_CONTAINER_TAG):latest
 
 ifeq ($(UNAME), Darwin)
@@ -52,13 +53,12 @@ ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), 
 	@#sudo sh -c "cp conf/com.zanaca.dockerdns-dnsmasq.plist /Library/LaunchDaemons/"
 	@#sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-dnsmasq.plist
 endif
-	@brew install `cat requirements.apt` -y
+	@brew install `cat requirements.apt | grep net-tools -v` -y
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
-	@[ Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
@@ -72,31 +72,36 @@ install-dependencies:
 	@sudo apt-get install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) /etc/resolv.conf), nameserver $(IP))
 		@echo "nameserver $(IP)" | sudo tee -a /etc/resolv.conf;
-		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 endif
-	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
+	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
+	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
+	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
 endif
-	@[ Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
 
 
-install: welcome install-dependencies build-docker-image ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
+install: welcome build-docker-image install-dependencies## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
 	@if [ `docker container inspect $(DOCKER_CONTAINER_NAME) 2> /dev/null | head -n1` = "[" ]; then \
 		docker stop $(DOCKER_CONTAINER_NAME) > /dev/null && docker rm $(DOCKER_CONTAINER_NAME) > /dev/null; \
 	fi
 	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
 	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json
 	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp $(DNSMASQ_LOCAL_CONF)
+	@openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
 	@sudo sh -c "cp -a conf/certs.d $(DOCKER_CONF_FOLDER)"
 	@while [ `docker ps 1> /dev/null` ]; do \
 		echo "Waiting for Docker..." \
 		sleep 2; \
 	done;
 	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
-	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker. E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
+	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
+	@echo PS: Make sure your active DNS is $(tail -n1 /etc/resolv.conf | cut -d\\  -f2)
 ifeq ($(UNAME), Darwin)
-	@cat ~/.ssh/known_hosts | grep 127.0.0.1]:$(SSH_PORT) -v > ~/.ssh/known_hosts_dd && mv ~/.ssh/known_hosts_dd ~/.ssh/known_hosts
-	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 >> ~/.ssh/known_hosts
+	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
+	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
+	@sudo cat `echo ~root`/.ssh/known_hosts | grep 127.0.0.1]:$(SSH_PORT) -v > /tmp/known_hosts_dd && sudo mv /tmp/known_hosts_dd `echo ~root`/.ssh/known_hosts
+	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 >> `echo ~root`/.ssh/known_hosts
 	@make tunnel & > /dev/null
 endif
 
@@ -105,7 +110,7 @@ uninstall: welcome ## Remove all files from docker-dns
 	@docker stop $(DOCKER_CONTAINER_NAME)
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
 	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json
-	@if [ `grep ${IP} /etc/resolv.conf` ]; then grep -v "nameserver ${IP}" /etc/resolv.conf > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /tmp/resolv.conf; fi
+	@grep -v "nameserver ${IP}" /etc/resolv.conf > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /tmp/resolv.conf;
 	@#if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tuntap-up.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tuntap-up.plist; fi
 	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
@@ -113,8 +118,12 @@ ifeq ($(UNAME), Darwin)
 endif
 
 show-domain: ## View the docker domain installed
+ifeq ('$(docker images | grep $tag)', '')
+	@echo "docker-dns not installed! Please install first"
+else
 	@echo Working domain:
-	@docker inspect ns0 | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+	@docker inspect $(tag) | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+endif
 
 help: welcome
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep ^help -v | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'

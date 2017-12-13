@@ -1,7 +1,7 @@
 strict-order
 bind-interfaces
 interface=lo0
-#interface=docker0
+interface=docker0
 
 server=/${TLD}/${IP}
 address=/${HOSTNAME}.${TLD}/${IP}
