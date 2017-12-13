@@ -22,7 +22,7 @@ ifeq ($(UNAME), Darwin)
 	DNSMASQ_LOCAL_CONF := /usr/local/etc/dnsmasq.conf
 	SSH_PORT = 2200
 	PUBLISH_SSH_PORT = -p $(SSH_PORT):22
-	RESOLVCONF := $(shell if [ -f /run/systemd/resolve/resolv.conf ]; then /run/systemd/resolve/resolv.conf; else /etc/resolv.conf; fi)
+	RESOLVCONF := /etc/resolv.conf
 else
 	IP := $(shell ifconfig docker0 | grep "inet " | cut -d\  -f10)
 	DOCKER_CONF_FOLDER := /etc/docker
@@ -30,7 +30,11 @@ else
 	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 	DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 	PUBLISH_IP_MASK = $(IP):
-	RESOLVCONF := /etc/resolv.conf
+	ifeq ($(shell test -e /run/systemd/resolve/stub-resolv.conf && echo ok), ok)
+		RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
+	else
+		RESOLVCONF := /etc/resolf.conf
+	endif
 endif
 
 welcome:
@@ -58,7 +62,7 @@ endif
 	@brew install `cat requirements.apt | grep net-tools -v` -y
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@echo "nameserver $(IP)" | sudo - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
@@ -73,10 +77,11 @@ install-dependencies:
 	@[ `sudo -n true 2>/dev/null` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
 	@sudo apt-get install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
-		@echo "nameserver $(IP)" | sudo tee -a $(RESOLVCONF);
+	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
+	cat $(RESOLVCONF)
 endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
 	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
