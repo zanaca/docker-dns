@@ -9,6 +9,8 @@ RUN apk --no-cache add dnsmasq openssl openssh python
 ENV DOCKER_GEN_VERSION 0.7.3
 ENV DOCKER_HOST unix:///var/run/docker.sock
 ENTRYPOINT ["/root/entrypoint.sh"]
+RUN echo "nameserver 8.8.4.4" > /etc/resolv.conf
+RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 RUN wget -qO- https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz | tar xvz -C /usr/local/bin
 ADD conf/dnsmasq.tpl /root/dnsmasq.tpl

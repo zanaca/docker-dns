@@ -22,6 +22,7 @@ ifeq ($(UNAME), Darwin)
 	DNSMASQ_LOCAL_CONF := /usr/local/etc/dnsmasq.conf
 	SSH_PORT = 2200
 	PUBLISH_SSH_PORT = -p $(SSH_PORT):22
+	RESOLVCONF := /etc/resolv.conf
 else
 	IP := $(shell ifconfig docker0 | grep "inet " | cut -d\  -f10)
 	DOCKER_CONF_FOLDER := /etc/docker
@@ -29,6 +30,11 @@ else
 	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 	DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 	PUBLISH_IP_MASK = $(IP):
+	ifeq ($(shell test -e /run/systemd/resolve/stub-resolv.conf && echo ok), ok)
+		RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
+	else
+		RESOLVCONF := /etc/resolf.conf
+	endif
 endif
 
 welcome:
@@ -56,7 +62,7 @@ endif
 	@brew install `cat requirements.apt | grep net-tools -v` -y
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@echo "nameserver $(IP)" | sudo - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
@@ -70,11 +76,12 @@ else
 install-dependencies:
 	@[ `sudo -n true 2>/dev/null` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
 	@sudo apt-get install `cat requirements.apt` -y
-ifneq ($(shell grep $(IP) /etc/resolv.conf), nameserver $(IP))
-		@echo "nameserver $(IP)" | sudo tee -a /etc/resolv.conf;
+ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
+	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
+	cat $(RESOLVCONF)
 endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; fi
-	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD)
+	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
 	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
@@ -96,7 +103,7 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 	done;
 	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
-	@echo PS: Make sure your active DNS is $(tail -n1 /etc/resolv.conf | cut -d\\  -f2)
+	@echo PS: Make sure your active DNS is $(tail -n1 $RESOLVCONF | cut -d\\  -f2)
 ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
@@ -110,7 +117,7 @@ uninstall: welcome ## Remove all files from docker-dns
 	@docker stop $(DOCKER_CONTAINER_NAME)
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
 	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json
-	@grep -v "nameserver ${IP}" /etc/resolv.conf > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /tmp/resolv.conf;
+	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
 	@#if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tuntap-up.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tuntap-up.plist; fi
 	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
