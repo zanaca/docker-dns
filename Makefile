@@ -58,15 +58,15 @@ install-dependencies:
 ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), no_dnsmasq)
 	@#sudo brew install dnsmasq
 	@mkdir -pv $(brew --prefix)/etc/
-	@#sudo sh -c "cp conf/com.zanaca.dockerdns-dnsmasq.plist /Library/LaunchAgents/"
-	@#sudo launchctl load -w /Library/LaunchAgents/com.zanaca.dockerdns-dnsmasq.plist
+	@#sudo sh -c "cp conf/com.zanaca.dockerdns-dnsmasq.plist /Library/LaunchDaemons/"
+	@#sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-dnsmasq.plist
 endif
 	@brew install `cat requirements.apt | grep net-tools -v` -y 1> /dev/null 1> /dev/null
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
-	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{SSHUTTLE\}:$(shell which sshuttle):g | sed s:\{SSH_PORT\}:$(SSH_PORT):g > /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist"
-	@sudo launchctl load -w /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist
+	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{SSHUTTLE\}:$(shell which sshuttle):g | sed s:\{SSH_PORT\}:$(SSH_PORT):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
+	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
 	# waiting docker-dns to load
@@ -123,10 +123,10 @@ endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
 	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
-	@if [ -f "/Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist; fi
+	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
 	@sudo test -e `echo ~root`/.ssh/known_hosts_pre_hud && sudo cp `echo ~root`/.ssh/known_hosts_pre_hud `echo ~root`/.ssh/known_hosts
-	@sudo launchctl unload -w /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist 2> /dev/null
+	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 2> /dev/null
 endif
 
 show-domain: ## View the docker domain installed
