@@ -54,7 +54,7 @@ build-docker-image:
 
 ifeq ($(UNAME), Darwin)
 install-dependencies:
-	@[ `sudo -n test -d ~root 2>/dev/null || echo 1` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
+	@test -z `sudo -n test -d ~root 2> /dev/null || echo 1` ||  printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo true > /dev/null
 ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), no_dnsmasq)
 	@#sudo brew install dnsmasq
 	@mkdir -pv $(brew --prefix)/etc/
