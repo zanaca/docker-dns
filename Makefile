@@ -10,6 +10,7 @@ WHO := $(shell whoami)
 HOME := $(shell echo ~)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
+SSHUTTLE := $(shell which sshuttle)
 
 DOCKER_CONTAINER_TAG := $(tag)
 DOCKER_CONTAINER_NAME := $(name)
@@ -64,14 +65,13 @@ endif
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
-	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist"
+	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{SSHUTTLE\}:$(shell which sshuttle):g | sed s:\{SSH_PORT\}:$(SSH_PORT):g > /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchAgents/com.zanaca.dockerdns-tunnel.plist
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
-	@#ssh -D "*:2201" -f -C -q -N root@127.0.0.1 -p $(SSH_PORT) -i Dockerfile_id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
-	@# sshuttle will run  in a daemon, so docker will no be running to discover it network IP
+	# waiting docker-dns to load
 	@while [ `nc -z 127.0.0.1 $(SSH_PORT) 2>&1 | wc -l` -eq 0 ] ; do sleep 1; done
-	@sudo sshuttle -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
+	@$(SSHUTTLE) -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
 
 else
 install-dependencies:
@@ -109,7 +109,7 @@ ifeq ($(UNAME), Darwin)
 	@sudo test -e `echo ~root`/.ssh/known_hosts_pre_hud || sudo cp `echo ~root`/.ssh/known_hosts `echo ~root`/.ssh/known_hosts_pre_hud
 	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
 	@echo Starting tunnel from host network to docker network
-	@make tunnel & > /dev/null
+	@sudo make tunnel & > /dev/null
 endif
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
 	@echo PS: Make sure your active DNS is $(tail -n1 $RESOLVCONF | cut -d\\  -f2)
