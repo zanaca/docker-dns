@@ -120,7 +120,6 @@ ifeq ($(UNAME), Darwin)
 	@sudo make tunnel
 endif
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
-	@echo PS: Make sure your active DNS is $(tail -n1 $RESOLVCONF | cut -d\\  -f2)
 
 uninstall: welcome ## Remove all files from docker-dns
 	@echo "Uninstalling docker dns exposure"
