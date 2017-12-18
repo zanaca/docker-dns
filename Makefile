@@ -11,6 +11,7 @@ HOME := $(shell echo ~)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
 SSHUTTLE := $(shell which sshuttle)
+OS_VERSION := $(shell cat /etc/issue | cut -d\  -f2 | cut -d. -f1)
 
 DOCKER_CONTAINER_TAG := $(tag)
 DOCKER_CONTAINER_NAME := $(name)
@@ -32,14 +33,12 @@ else
 	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 	DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 	PUBLISH_IP_MASK = $(IP):
-	ifeq ($(shell test -e /run/systemd/resolve/stub-resolv.conf && echo ok), ok)
+	ifeq ($(OS_VERSION), 17)
 		RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
+	else ifeq ($(OS_VERSION), 16)
+		RESOLVCONF := /etc/resolvconf/resolv.conf.d/head
 	else
-		ifeq ($(shell test -e /etc/resolvconf/resolv.conf.d/head && echo ok), ok)
-			RESOLVCONF := /etc/resolvconf/resolv.conf.d/head
-		else
-			RESOLVCONF := /etc/resolv.conf
-		endif
+		RESOLVCONF := /etc/resolv.conf
 	endif
 endif
 
@@ -83,16 +82,18 @@ install-dependencies:
 	@sudo apt-get install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
 	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
-	cat $(RESOLVCONF)
 endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
 	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
-	@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
-	@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
-	@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
+	ifeq ($(OS_VERSION), 16)
+		@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
+		@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
+		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
+		@sudo resolvconf -u
+	endif
 endif
 
 
