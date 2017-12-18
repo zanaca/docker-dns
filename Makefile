@@ -63,7 +63,7 @@ ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), 
 endif
 	@brew install `cat requirements.apt | grep net-tools -v` -y 1> /dev/null 1> /dev/null
 	@[ shuttle ] || sudo easy install sshuttle
-	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; touch /etc/resolver/$(TLD); fi
+	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{SSHUTTLE\}:$(shell which sshuttle):g | sed s:\{SSH_PORT\}:$(SSH_PORT):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
@@ -81,7 +81,7 @@ ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
 	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
 	cat $(RESOLVCONF)
 endif
-	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; touch /etc/resolver/$(TLD); fi
+	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
