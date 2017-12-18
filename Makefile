@@ -128,7 +128,7 @@ ifneq ($(shell docker images | grep ${DOCKER_CONTAINER_NAME} | wc -l | bc), 0)
 	@docker rmi $(DOCKER_CONTAINER_NAME) -f 2> /dev/null
 endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
-	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null
+	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
 	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
