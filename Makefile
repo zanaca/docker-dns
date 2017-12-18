@@ -88,12 +88,12 @@ endif
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
 	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
-	ifeq ($(OS_VERSION), 16)
+ifeq ($(OS_VERSION), 16)
 		@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
 		@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
 		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 		@sudo resolvconf -u
-	endif
+endif
 endif
 
 
