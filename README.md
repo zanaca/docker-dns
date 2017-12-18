@@ -43,7 +43,7 @@ Will create a docker image name *dns* and it will be available as *dns.docker.de
 ### Tested enviroment
  - Docker 17.0.4.0-ce
  - Docker for mac 17.06.0-ce
- - Ubuntu 17.Linux (Ubuntu, CentOS)10
+ - Ubuntu 17.10
  - macOS Sierra, High Sierra
 
 
