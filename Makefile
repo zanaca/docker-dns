@@ -71,7 +71,7 @@ endif
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
 	@# waiting docker-dns to load
 	@while [ `nc -z 127.0.0.1 $(SSH_PORT) 2>&1 | wc -l` -eq 0 ] ; do sleep 1; done
-	@$(SSHUTTLE) -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
+	@$(SSHUTTLE) -D -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
 
 else
 install-dependencies:
@@ -108,10 +108,10 @@ ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
 	@sudo test -e `echo ~root`/.ssh/known_hosts_pre_hud || sudo cp `echo ~root`/.ssh/known_hosts `echo ~root`/.ssh/known_hosts_pre_hud
 	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
-	@echo Starting tunnel from host network to docker network
-	@sudo make tunnel & > /dev/null
+	@echo Starting tunnel from host machine network to docker network
+	@sudo make tunnel
 endif
-	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
+	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
 	@echo PS: Make sure your active DNS is $(tail -n1 $RESOLVCONF | cut -d\\  -f2)
 
 uninstall: welcome ## Remove all files from docker-dns
