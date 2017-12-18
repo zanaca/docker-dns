@@ -35,7 +35,11 @@ else
 	ifeq ($(shell test -e /run/systemd/resolve/stub-resolv.conf && echo ok), ok)
 		RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
 	else
-		RESOLVCONF := /etc/resolf.conf
+		ifeq ($(shell test -e /etc/resolvconf/resolv.conf.d/head && echo ok), ok)
+			RESOLVCONF := /etc/resolvconf/resolv.conf.d/head
+		else
+			RESOLVCONF := /etc/resolv.conf
+		endif
 	endif
 endif
 
@@ -86,6 +90,9 @@ endif
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
 	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
+	@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
+	@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
+	@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 endif
 
 
