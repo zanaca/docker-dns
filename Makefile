@@ -26,7 +26,7 @@ ifeq ($(UNAME), Darwin)
 	PUBLISH_SSH_PORT = -p $(SSH_PORT):22
 	RESOLVCONF := /etc/resolv.conf
 else
-	IP := $(shell ifconfig docker0 | grep "inet " | cut -d\  -f10)
+	IP := $(shell ifconfig docker0 | grep "inet " | cut -dt -f2 | sed -e 's#[a-z: ]##' | cut -d\  -f1)
 	DOCKER_CONF_FOLDER := /etc/docker
 	DNSs := $(shell nmcli dev show | grep DNS|  cut -d\: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
 	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
@@ -54,7 +54,7 @@ build-docker-image:
 
 ifeq ($(UNAME), Darwin)
 install-dependencies:
-	@[ `sudo -n test -d ~root 2>/dev/null || echo 1` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
+	@test -z `sudo -n test -d ~root 2> /dev/null || echo 1` ||  printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo true > /dev/null
 ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), no_dnsmasq)
 	@#sudo brew install dnsmasq
 	@mkdir -pv $(brew --prefix)/etc/
@@ -69,9 +69,9 @@ endif
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
-	# waiting docker-dns to load
+	@# waiting docker-dns to load
 	@while [ `nc -z 127.0.0.1 $(SSH_PORT) 2>&1 | wc -l` -eq 0 ] ; do sleep 1; done
-	@$(SSHUTTLE) -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
+	@$(SSHUTTLE) -D -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
 
 else
 install-dependencies:
@@ -108,10 +108,10 @@ ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
 	@sudo test -e `echo ~root`/.ssh/known_hosts_pre_hud || sudo cp `echo ~root`/.ssh/known_hosts `echo ~root`/.ssh/known_hosts_pre_hud
 	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
-	@echo Starting tunnel from host network to docker network
-	@sudo make tunnel & > /dev/null
+	@echo Starting tunnel from host machine network to docker network
+	@sudo make tunnel
 endif
-	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: ping $(DOCKER_CONTAINER_NAME).$(TLD)
+	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
 	@echo PS: Make sure your active DNS is $(tail -n1 $RESOLVCONF | cut -d\\  -f2)
 
 uninstall: welcome ## Remove all files from docker-dns
