@@ -11,6 +11,7 @@ HOME := $(shell echo ~)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
 SSHUTTLE := $(shell which sshuttle)
+OS_VERSION := $(shell cat /etc/issue | cut -d\  -f2 | cut -d. -f1)
 
 DOCKER_CONTAINER_TAG := $(tag)
 DOCKER_CONTAINER_NAME := $(name)
@@ -26,16 +27,18 @@ ifeq ($(UNAME), Darwin)
 	PUBLISH_SSH_PORT = -p $(SSH_PORT):22
 	RESOLVCONF := /etc/resolv.conf
 else
-	IP := $(shell ifconfig docker0 | grep "inet " | cut -dt -f2 | sed -e 's\#[a-z: ]\#\#' | cut -d\  -f1)
+	IP := $(shell ifconfig docker0 | grep "inet " | cut -dt -f2 | cut -d: -f2 | sed -e 's\# \#\#' | cut -d\  -f1)
 	DOCKER_CONF_FOLDER := /etc/docker
 	DNSs := $(shell nmcli dev show | grep DNS|  cut -d\: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
 	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 	DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 	PUBLISH_IP_MASK = $(IP):
-	ifeq ($(shell test -e /run/systemd/resolve/stub-resolv.conf && echo ok), ok)
+	ifeq ($(OS_VERSION), 17)
 		RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
+	else ifeq ($(OS_VERSION), 16)
+		RESOLVCONF := /etc/resolvconf/resolv.conf.d/head
 	else
-		RESOLVCONF := /etc/resolf.conf
+		RESOLVCONF := /etc/resolv.conf
 	endif
 endif
 
@@ -63,7 +66,7 @@ ifeq ($(shell cat /usr/local/etc/dnsmasq.conf 2> /dev/null || echo no_dnsmasq), 
 endif
 	@brew install `cat requirements.apt | grep net-tools -v` -y 1> /dev/null 1> /dev/null
 	@[ shuttle ] || sudo easy install sshuttle
-	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; fi
+	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{SSHUTTLE\}:$(shell which sshuttle):g | sed s:\{SSH_PORT\}:$(SSH_PORT):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
@@ -79,13 +82,18 @@ install-dependencies:
 	@sudo apt-get install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
 	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
-	cat $(RESOLVCONF)
 endif
-	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; fi
+	@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
 	@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
 	@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
+ifeq ($(OS_VERSION), 16)
+		@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
+		@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
+		@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
+		@sudo resolvconf -u
+endif
 endif
 
 
@@ -93,8 +101,8 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 	@if [ `docker container inspect $(DOCKER_CONTAINER_NAME) 2> /dev/null | head -n1` = "[" ]; then \
 		docker stop $(DOCKER_CONTAINER_NAME) > /dev/null && docker rm $(DOCKER_CONTAINER_NAME) > /dev/null; \
 	fi
-	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
-	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
+	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
+	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
 	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
 	@openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
 	@sudo sh -c "cp -a conf/certs.d $(DOCKER_CONF_FOLDER)"
@@ -112,7 +120,6 @@ ifeq ($(UNAME), Darwin)
 	@sudo make tunnel
 endif
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
-	@echo PS: Make sure your active DNS is $(tail -n1 $RESOLVCONF | cut -d\\  -f2)
 
 uninstall: welcome ## Remove all files from docker-dns
 	@echo "Uninstalling docker dns exposure"
@@ -121,7 +128,7 @@ ifneq ($(shell docker images | grep ${DOCKER_CONTAINER_NAME} | wc -l | bc), 0)
 	@docker rmi $(DOCKER_CONTAINER_NAME) -f 2> /dev/null
 endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
-	@cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null
+	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
 	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
