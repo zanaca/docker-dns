@@ -4,16 +4,22 @@
   <dict>
     <key>Label</key>
     <string>com.zanaca.dockerdns-tunnel</string>
+    <key>Program</key>
+	  <string>/usr/bin/make</string>
     <key>ProgramArguments</key>
     <array>
-      <string>make</string>
-      <string>-f</string>
-      <string>{PWD}/Makefile</string>
-      <string>tunnel</string>
+      <string>{SSHUTTLE}</string>
+      <string>-r</string>
+      <string>root@127.0.0.1:{SSH_PORT}</string>
+      <string>172.17.0.0/24</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
+    <key>StandardErrorPath</key>
+	  <string>/var/log/dockerdns-tunnel.log</string>
+	  <key>UserName</key>
+	  <string>root</string>
   </dict>
 </plist>
