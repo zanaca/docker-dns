@@ -18,6 +18,7 @@ DOCKER_CONTAINER_NAME := $(name)
 TLD := $(tld)
 
 ifeq ($(UNAME), Darwin)
+    LOOPBACK := ''
 	IP := $(shell ifconfig en0 | grep "inet " | cut -d\  -f2)
 	DOCKER_CONF_FOLDER := $(HOME)/Library/Containers/com.docker.docker/Data/database/com.docker.driver.amd64-linux/etc/docker
 	DNSs := $(shell scutil --dns | grep nameserver | cut -d: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
@@ -27,6 +28,7 @@ ifeq ($(UNAME), Darwin)
 	PUBLISH_SSH_PORT = -p $(SSH_PORT):22
 	RESOLVCONF := /etc/resolv.conf
 else
+	LOOPBACK := $(shell ifconfig | grep -i LOOPBACK  | head -n1 | cut -d\   -f1 | sed -e 's#:##')
 	IP := $(shell ifconfig docker0 | grep "inet " | cut -dt -f2 | cut -d: -f2 | sed -e 's\# \#\#' | cut -d\  -f1)
 	DOCKER_CONF_FOLDER := /etc/docker
 	DNSs := $(shell nmcli dev show | grep DNS|  cut -d\: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
@@ -103,7 +105,7 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 	fi
 	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
 	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
-	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
+	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
 	@openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
 	@sudo sh -c "cp -a conf/certs.d $(DOCKER_CONF_FOLDER)"
 	@while [ `docker ps 1> /dev/null` ]; do \

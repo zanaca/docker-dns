@@ -1,6 +1,6 @@
 strict-order
 bind-interfaces
-interface=lo0
+interface=${LOOPBACK}
 interface=docker0
 
 server=/${TLD}/${IP}
