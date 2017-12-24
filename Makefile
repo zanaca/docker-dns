@@ -11,6 +11,7 @@ HOME := $(shell echo ~)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
 SSHUTTLE := $(shell which sshuttle)
+DOCKER := $(shell which docker)
 OS_VERSION := $(shell (cat /etc/issue 2> /dev/null || false) | cut -d\  -f2 | cut -d. -f1)
 
 DOCKER_CONTAINER_TAG := $(tag)
@@ -55,7 +56,7 @@ welcome:
 
 build-docker-image:
 	@[ -f Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
-	@docker build . -t $(DOCKER_CONTAINER_TAG):latest
+	@$(DOCKER) build . -t $(DOCKER_CONTAINER_TAG):latest
 
 ifeq ($(UNAME), Darwin)
 install-dependencies:
@@ -100,19 +101,19 @@ endif
 
 
 install: welcome build-docker-image install-dependencies## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
-	@if [ `docker container inspect $(DOCKER_CONTAINER_NAME) 2> /dev/null | head -n1` = "[" ]; then \
-		docker stop $(DOCKER_CONTAINER_NAME) > /dev/null && docker rm $(DOCKER_CONTAINER_NAME) > /dev/null; \
+	@if [ `$(DOCKER) container inspect $(DOCKER_CONTAINER_NAME) 2> /dev/null | head -n1` = "[" ]; then \
+		$(DOCKER) stop $(DOCKER_CONTAINER_NAME) > /dev/null && $(DOCKER) rm $(DOCKER_CONTAINER_NAME) > /dev/null; \
 	fi
 	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
 	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
 	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
 	@openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
 	@sudo sh -c "cp -a conf/certs.d $(DOCKER_CONF_FOLDER)"
-	@while [ `docker ps 1> /dev/null` ]; do \
+	@while [ `$(DOCKER) ps 1> /dev/null` ]; do \
 		echo "Waiting for Docker..." \
 		sleep 2; \
 	done;
-	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
+	@$(DOCKER) run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
 ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
@@ -127,9 +128,9 @@ uninstall: welcome ## Remove all files from docker-dns
 	@echo "Uninstalling docker dns exposure"
 ifneq ($(shell docker images | grep ${DOCKER_CONTAINER_NAME} | wc -l | bc), 0)
 	@echo "- Stopping container if necessary"
-	@docker stop $(DOCKER_CONTAINER_NAME) 2> /dev/null 1> /dev/null
+	@$(DOCKER) stop $(DOCKER_CONTAINER_NAME) 2> /dev/null 1> /dev/null
 	@echo "- Removing container image if necessary"
-	@docker rmi $(DOCKER_CONTAINER_NAME) -f 2> /dev/null 1> /dev/null
+	@$(DOCKER) rmi $(DOCKER_CONTAINER_NAME) -f 2> /dev/null 1> /dev/null
 endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
 	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
@@ -145,7 +146,7 @@ ifeq ('$(docker images | grep $tag)', '')
 	@echo "docker-dns not installed! Please install first"
 else
 	@echo Working domain:
-	@docker inspect $(tag) | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+	@$(DOCKER) inspect $(tag) | grep TOP_ | cut -d= -f2 | cut -d\" -f1
 endif
 
 help: welcome
