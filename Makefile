@@ -11,7 +11,7 @@ HOME := $(shell echo ~)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
 SSHUTTLE := $(shell which sshuttle)
-OS_VERSION := $(shell cat /etc/issue | cut -d\  -f2 | cut -d. -f1)
+OS_VERSION := $(shell (cat /etc/issue 2> /dev/null || false) | cut -d\  -f2 | cut -d. -f1)
 
 DOCKER_CONTAINER_TAG := $(tag)
 DOCKER_CONTAINER_NAME := $(name)
