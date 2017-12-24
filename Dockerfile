@@ -8,6 +8,7 @@ RUN apk --no-cache add dnsmasq openssl openssh python
 
 ENV DOCKER_GEN_VERSION 0.7.3
 ENV DOCKER_HOST unix:///var/run/docker.sock
+ENV HOSTUNAME Linux
 ENTRYPOINT ["/root/entrypoint.sh"]
 RUN echo "nameserver 8.8.4.4" > /etc/resolv.conf
 RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf

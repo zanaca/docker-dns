@@ -8,10 +8,10 @@
 	  <string>/usr/bin/make</string>
     <key>ProgramArguments</key>
     <array>
-      <string>{SSHUTTLE}</string>
-      <string>-r</string>
-      <string>root@127.0.0.1:{SSH_PORT}</string>
-      <string>172.17.0.0/24</string>
+      <string>/usr/bin/make</string>
+      <string>-f</string>
+      <string>{PWD}/Makefile</string>
+      <string>tunnel</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

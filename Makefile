@@ -70,13 +70,13 @@ endif
 	@[ shuttle ] || sudo easy install sshuttle
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
-	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{SSHUTTLE\}:$(shell which sshuttle):g | sed s:\{SSH_PORT\}:$(SSH_PORT):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
+	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
 	@# waiting docker-dns to load
 	@while [ `nc -z 127.0.0.1 $(SSH_PORT) 2>&1 | wc -l` -eq 0 ] ; do sleep 1; done
-	@$(SSHUTTLE) -D -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
+	@$(SSHUTTLE) -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
 
 else
 install-dependencies:
@@ -112,28 +112,30 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 		echo "Waiting for Docker..." \
 		sleep 2; \
 	done;
-	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
+	@docker run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
 ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
 	@sudo test -e `echo ~root`/.ssh/known_hosts_pre_hud || sudo cp `echo ~root`/.ssh/known_hosts `echo ~root`/.ssh/known_hosts_pre_hud
 	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
 	@echo Starting tunnel from host machine network to docker network
-	@sudo make tunnel
+	@sudo make tunnel &
 endif
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
 
 uninstall: welcome ## Remove all files from docker-dns
 	@echo "Uninstalling docker dns exposure"
 ifneq ($(shell docker images | grep ${DOCKER_CONTAINER_NAME} | wc -l | bc), 0)
-	@#docker stop $(DOCKER_CONTAINER_NAME) 2> /dev/null
-	@docker rmi $(DOCKER_CONTAINER_NAME) -f 2> /dev/null
+	@echo "- Stopping container if necessary"
+	@docker stop $(DOCKER_CONTAINER_NAME) 2> /dev/null 1> /dev/null
+	@echo "- Removing container image if necessary"
+	@docker rmi $(DOCKER_CONTAINER_NAME) -f 2> /dev/null 1> /dev/null
 endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF)
 	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
-	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist; fi
 ifeq ($(UNAME), Darwin)
+	@if [ -f "/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist" ]; then sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist; fi
 	@sudo test -e `echo ~root`/.ssh/known_hosts_pre_hud && sudo cp `echo ~root`/.ssh/known_hosts_pre_hud `echo ~root`/.ssh/known_hosts
 	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 2> /dev/null
 endif
