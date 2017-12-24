@@ -75,7 +75,6 @@ endif
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
-	@# waiting docker-dns to load
 	@while [ `nc -z 127.0.0.1 $(SSH_PORT) 2>&1 | wc -l` -eq 0 ] ; do sleep 1; done
 	@$(SSHUTTLE) -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
 
