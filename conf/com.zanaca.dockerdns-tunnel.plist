@@ -4,8 +4,6 @@
   <dict>
     <key>Label</key>
     <string>com.zanaca.dockerdns-tunnel</string>
-    <key>Program</key>
-	  <string>/usr/bin/make</string>
     <key>ProgramArguments</key>
     <array>
       <string>{PWD}/macos-tunnel.sh</string>
