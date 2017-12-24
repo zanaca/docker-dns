@@ -10,7 +10,6 @@ WHO := $(shell whoami)
 HOME := $(shell echo ~)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
-SSHUTTLE := $(shell which sshuttle)
 DOCKER := $(shell which docker)
 OS_VERSION := $(shell (cat /etc/issue 2> /dev/null || false) | cut -d\  -f2 | cut -d. -f1)
 
@@ -75,8 +74,7 @@ endif
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 
 tunnel: ## Creates a tunnel between local machine and docker network - macOS only
-	@while [ `nc -z 127.0.0.1 $(SSH_PORT) 2>&1 | wc -l` -eq 0 ] ; do sleep 1; done
-	@$(SSHUTTLE) -r root@127.0.0.1:$(SSH_PORT) 172.17.0.0/24
+	@./macos-tunnel.sh
 
 else
 install-dependencies:

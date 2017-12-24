@@ -8,10 +8,7 @@
 	  <string>/usr/bin/make</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/usr/bin/make</string>
-      <string>-f</string>
-      <string>{PWD}/Makefile</string>
-      <string>tunnel</string>
+      <string>{PWD}/macos-tunnel.sh</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
