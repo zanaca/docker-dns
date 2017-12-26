@@ -143,6 +143,12 @@ endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF) 2> /dev/null 1> /dev/null
 	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
+	@grep -v "nameserver ${IP}" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head;
+ifeq ($(OS_VERSION), 16)
+	@grep -v "nameserver ${IP}" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp  /etc/resolvconf/resolv.conf.d/head;
+	@sudo resolvconf -u
+endif
+
 ifeq ($(UNAME), Darwin)
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts_pre_hud ]"; then sudo cp `echo ~root`/.ssh/known_hosts_pre_hud `echo ~root`/.ssh/known_hosts; fi
 	@echo Unloading tunnel service
