@@ -6,7 +6,7 @@ It was created to allow you to work in a container as if was a "real" server set
 
 It was tested on linux and macOS sierra. macOS environment has a downside that you will always run the `make tunnel` every time you boot the host machine,
 
-The main usage is for development only, should not be used in production environment.
+The main usage is for development only, should not be used in production environment. (it is not a full orchastration service)
 
 By default it will enable create that hosts: *ns0.docker* and *ns0.$YOUR_HOSTNAME.docker*.
 
