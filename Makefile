@@ -143,10 +143,12 @@ endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF) 2> /dev/null 1> /dev/null
 	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
+ifeq ($(UNAME), Darwin)
 	@grep -v "nameserver ${IP}" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head;
 ifeq ($(OS_VERSION), 16)
 	@grep -v "nameserver ${IP}" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp  /etc/resolvconf/resolv.conf.d/head;
 	@sudo resolvconf -u
+endif
 endif
 
 ifeq ($(UNAME), Darwin)
