@@ -25,8 +25,6 @@ ifeq ($(UNAME), Darwin)
 	DNSs := $(shell scutil --dns | grep nameserver | cut -d: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
 	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 	DNSMASQ_LOCAL_CONF := /usr/local/etc/dnsmasq.conf
-	SSH_PORT = 2200
-	PUBLISH_SSH_PORT = -p $(SSH_PORT):22
 	RESOLVCONF := /etc/resolv.conf
 else
 	LOOPBACK := $(shell ifconfig | grep -i LOOPBACK  | head -n1 | cut -d\  -f1 | sed -e 's\#:\#\#')
@@ -118,15 +116,16 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 		sleep 2; \
 	done;
 	@echo Starting $(DOCKER_CONTAINER_NAME) container...
-	@$(DOCKER) run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 $(PUBLISH_SSH_PORT) -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
+	@$(DOCKER) run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 -P 22 -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
 ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
 	@echo Generating known_hosts backup for user "root", if necessary
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts ]"; then sudo cp $(HOME_ROOT)/.ssh/known_hosts $(HOME_ROOT)/.ssh/known_hosts_pre_hud; fi
 	@echo Adding key to known_hosts for user "root"
-	@sleep 1 && ssh-keyscan -p $(SSH_PORT) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
+	@sleep 3 && ssh-keyscan -p $(shell docker port ${DOCKER_CONTAINER_NAME} | grep 22/ | cut -d: -f2) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
 	@echo Starting tunnel from host machine network to docker network
+	@sudo sh -c "cat conf/macos-tunnel.sh.tpl | sed s:\{DOCKER_CONTAINER_NAME\}:$(DOCKER_CONTAINER_NAME):g > macos-tunnel.sh"; chmod +x macos-tunnel.sh
 	@sudo make tunnel &
 endif
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
