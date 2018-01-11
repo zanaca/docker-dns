@@ -116,16 +116,18 @@ install: welcome build-docker-image install-dependencies## Setup DNS container t
 		sleep 2; \
 	done;
 	@echo Starting $(DOCKER_CONTAINER_NAME) container...
-	@$(DOCKER) run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 -P 22 -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
+	@$(DOCKER) run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 -P -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
 ifeq ($(UNAME), Darwin)
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
 	@echo Generating known_hosts backup for user "root", if necessary
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts ]"; then sudo cp $(HOME_ROOT)/.ssh/known_hosts $(HOME_ROOT)/.ssh/known_hosts_pre_hud; fi
 	@echo Adding key to known_hosts for user "root"
-	@sleep 3 && ssh-keyscan -p $(shell docker port ${DOCKER_CONTAINER_NAME} | grep 22/ | cut -d: -f2) 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
+	@sleep 3 && ssh-keyscan -p `docker port $(DOCKER_CONTAINER_NAME) | grep 22/ | cut -d: -f2` 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
 	@echo Starting tunnel from host machine network to docker network
-	@sudo sh -c "cat conf/macos-tunnel.sh.tpl | sed s:\{DOCKER_CONTAINER_NAME\}:$(DOCKER_CONTAINER_NAME):g > macos-tunnel.sh"; chmod +x macos-tunnel.sh
+	@sudo rm macos-tunnel.sh 1> /dev/null 2> /dev/null
+	@cat conf/macos-tunnel.sh.tpl | sed s:\{DOCKER_CONTAINER_NAME\}:$(DOCKER_CONTAINER_NAME):g > macos-tunnel.sh;
+	@sudo chmod +x macos-tunnel.sh
 	@sudo make tunnel &
 endif
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
@@ -142,7 +144,7 @@ endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF) 2> /dev/null 1> /dev/null
 	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
 	@grep -v "nameserver ${IP}" ${RESOLVCONF} > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
-ifeq ($(UNAME), Darwin)
+ifneq ($(UNAME), Darwin)
 	@grep -v "nameserver ${IP}" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head;
 ifeq ($(OS_VERSION), 16)
 	@grep -v "nameserver ${IP}" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp  /etc/resolvconf/resolv.conf.d/head;
@@ -157,7 +159,7 @@ ifeq ($(UNAME), Darwin)
 	@echo Deleting tunnel service
 	@test -e /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist && sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
 	@echo Removing certifiactes for $(TLD) from $(DOCKER_CONF_FOLDER)
-	@sudo sh -c "rm $(DOCKER_CONF_FOLDER)/$(TLD).*"
+	@sudo sh -c "rm $(DOCKER_CONF_FOLDER)/$(TLD).* 1> /dev/null 2> /dev/null"
 endif
 
 show-domain: ## View the docker domain installed
