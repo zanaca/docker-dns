@@ -125,7 +125,7 @@ ifeq ($(UNAME), Darwin)
 	@echo Adding key to known_hosts for user "root"
 	@sleep 3 && ssh-keyscan -p `docker port $(DOCKER_CONTAINER_NAME) | grep 22/ | cut -d: -f2` 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a `echo ~root`/.ssh/known_hosts
 	@echo Starting tunnel from host machine network to docker network
-	@sudo rm macos-tunnel.sh 1> /dev/null 2> /dev/null
+	@$(shell test -f macos-tunnel.sh && sudo rm macos-tunnel.sh 1> /dev/null 2> /dev/null)
 	@cat conf/macos-tunnel.sh.tpl | sed s:\{DOCKER_CONTAINER_NAME\}:$(DOCKER_CONTAINER_NAME):g > macos-tunnel.sh;
 	@sudo chmod +x macos-tunnel.sh
 	@sudo make tunnel &
