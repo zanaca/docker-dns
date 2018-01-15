@@ -1,2 +1,3 @@
 Dockerfile_id_rsa*
 conf/certs.d/*
+macos-tunnel.sh
