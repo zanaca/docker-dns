@@ -6,7 +6,7 @@ DNSs := $(shell nmcli dev show | grep DNS|  cut -d\: -f2 | sort | uniq | sed s/\
 DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 PUBLISH_IP_MASK = $(IP):
-RESOLVCONF := /etc/rersolv.conf
+RESOLVCONF := /etc/resolv.conf
 PACKAGE_MANAGER=apt-get
 
 install-dependencies-os:
