@@ -7,6 +7,7 @@ DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 PUBLISH_IP_MASK = $(IP):
 RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
+PACKAGE_MANAGER=apt-get
 
 install-dependencies-os:
 	#@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; sudo touch /etc/resolver/$(TLD); fi

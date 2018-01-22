@@ -47,7 +47,7 @@ install-dependencies: install-dependencies-macos
 else
 install-dependencies:
 	@[ `sudo -n true 2>/dev/null` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
-	@sudo apt-get install `cat requirements.apt` -y
+	@sudo ${PACKAGE_MANAGER} install `cat requirements.apt` -y
 ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
 	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
 endif
