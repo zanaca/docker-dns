@@ -6,42 +6,22 @@ tld ?= docker
 name ?= $(tag)
 
 UNAME := $(shell uname)
+OS := $(shell cat /etc/issue || macos 2> /dev/null | cut -d\. -f1 | sed s/\ //g);
 WHO := $(shell whoami)
 HOME := $(shell echo ~)
 HOME_ROOT := $(shell echo ~root)
 PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
 HOSTNAME := $(shell hostname)
 DOCKER := $(shell which docker)
-OS_VERSION := $(shell (cat /etc/issue 2> /dev/null || false) | cut -d\  -f2 | cut -d. -f1)
+
 
 DOCKER_CONTAINER_TAG := $(tag)
 DOCKER_CONTAINER_NAME := $(name)
 TLD := $(tld)
 
-ifeq ($(UNAME), Darwin)
-    LOOPBACK := ''
-	IP := $(shell ifconfig en0 | grep "inet " | cut -d\  -f2)
-	DOCKER_CONF_FOLDER := $(HOME)/Library/Containers/com.docker.docker/Data/database/com.docker.driver.amd64-linux/etc/docker
-	DNSs := $(shell scutil --dns | grep nameserver | cut -d: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
-	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
-	DNSMASQ_LOCAL_CONF := /usr/local/etc/dnsmasq.conf
-	RESOLVCONF := /etc/resolv.conf
-else
-	LOOPBACK := $(shell ifconfig | grep -i LOOPBACK  | head -n1 | cut -d\  -f1 | sed -e 's\#:\#\#')
-	IP := $(shell ifconfig docker0 | grep "inet " | cut -dt -f2 | cut -d: -f2 | sed -e 's\# \#\#' | cut -d\  -f1)
-	DOCKER_CONF_FOLDER := /etc/docker
-	DNSs := $(shell nmcli dev show | grep DNS|  cut -d\: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
-	DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
-	DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
-	PUBLISH_IP_MASK = $(IP):
-	ifeq ($(OS_VERSION), 17)
-		RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
-	else ifeq ($(OS_VERSION), 16)
-		RESOLVCONF := /etc/resolvconf/resolv.conf.d/head
-	else
-		RESOLVCONF := /etc/resolv.conf
-	endif
-endif
+
+-include Makefile/${UNAME}_${OS}.mk
+
 
 welcome:
 	@printf "\033[33m     _            _                      _            \n"
@@ -73,8 +53,6 @@ endif
 	@echo Loading tunnel service
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 1>/dev/null 2>/dev/null
 
-tunnel: ## Creates a tunnel between local machine and docker network - macOS only
-	@./macos-tunnel.sh
 
 else
 install-dependencies:
