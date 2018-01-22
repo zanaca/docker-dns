@@ -7,7 +7,7 @@ DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 PUBLISH_IP_MASK = $(IP):
 RESOLVCONF := /etc/resolv.conf
-PACKAGE_MANAGER=apt-get
+PACKAGE_MANAGER=dnf
 
 install-dependencies-os:
 
