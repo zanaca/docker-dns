@@ -7,3 +7,15 @@ DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
 PUBLISH_IP_MASK = $(IP):
 RESOLVCONF := /etc/resolvconf/resolv.conf.d/head
+
+install-dependencies-os:
+	@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
+	@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
+	@echo "nameserver $(IP)" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
+	@sudo resolvconf -u
+
+install-os:
+
+uninstall-os:
+	@grep -v "nameserver ${IP}" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp  /etc/resolvconf/resolv.conf.d/head;
+	@sudo resolvconf -u
