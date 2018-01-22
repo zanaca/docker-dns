@@ -6,7 +6,7 @@ tld ?= docker
 name ?= $(tag)
 
 UNAME := $(shell uname)
-OS := $(shell cat /etc/issue || macos 2> /dev/null | cut -d\. -f1 | sed s/\ //g);
+OS := $(shell cat /etc/issue 2> /dev/null || echo macos | cut -d\. -f1 | sed s/\ //g)
 WHO := $(shell whoami)
 HOME := $(shell echo ~)
 HOME_ROOT := $(shell echo ~root)
@@ -19,8 +19,7 @@ DOCKER_CONTAINER_TAG := $(tag)
 DOCKER_CONTAINER_NAME := $(name)
 TLD := $(tld)
 
-
--include Makefile/${UNAME}_${OS}.mk
+include conf/Makefile/${UNAME}_${OS}.mk
 
 
 welcome:
