@@ -28,14 +28,20 @@ else
 endif
 include conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk
 
-_checkDockerIsUp:
-ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yess) || echo no),no)
+_check-docker-is-up:
+ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yes) || echo no),no)
 	@echo "Docker is not up! Network docker0 interface was not found"
 	@echo ""
 	@exit 1
 endif
+ifeq ($(shell groups ${WHO} | grep -q -E ' docker' || echo no),no)
+	@echo "You do not have permission to run Docker! Try to use a new session"
+	@echo ""
+	@exit 1
+endif
 
-welcome: _checkDockerIsUp
+
+welcome: _check-docker-is-up
 	@printf "\033[33m     _            _                      _            \n"
 	@printf "\033[33m  __| | ___   ___| | _____ _ __       __| |_ __  ___  \n"
 	@printf "\033[33m / _\` |/ _ \ / __| |/ / _ \ '__|____ / _\` | '_ \/ __| \n"
@@ -97,7 +103,7 @@ endif
 	@make uninstall-os
 endif
 
-show-domain: _checkDockerIsUp ## View the docker domain installed
+show-domain: _check-docker-is-up ## View the docker domain installed
 ifeq ('$(docker inspect ${DOCKER_CONTAINER_TAG})', '[]')
 	@echo "docker-dns not installed! Please install first"
 else
