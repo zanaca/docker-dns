@@ -36,7 +36,7 @@ Example:
 Will create a docker image name *dns* and it will be available as *dns.docker.dev* so you could run `dig www.google.com @dns.docker.dev`
 
 ### Requirements
- - [Docker](https://www.docker.com/docker-ubuntu) or [Docker for mac](https://www.docker.com/docker-mac)
+ - [Docker CE](https://www.docker.com/docker-ubuntu) or [Docker for mac](https://www.docker.com/docker-mac)
  - [Homebrew](https://brew.sh/) for macOS machines
 
 
