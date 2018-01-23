@@ -5,7 +5,19 @@ tag ?= ns0
 tld ?= docker
 name ?= $(tag)
 
+DOCKER_INTERFACE=docker0
 UNAME := $(shell uname)
+WHO := $(shell whoami)
+HOME := $(shell echo ~)
+HOME_ROOT := $(shell echo ~root)
+PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
+HOSTNAME := $(shell hostname)
+DOCKER := $(shell which docker)
+
+DOCKER_CONTAINER_TAG := $(tag)
+DOCKER_CONTAINER_NAME := $(name)
+TLD := $(tld)
+
 -include /etc/os-release
 ifeq (${UNAME},Darwin)
 	NAME=macOS
@@ -14,22 +26,16 @@ else
 	NAME := $(shell echo ${NAME} | sed -e s/\"//g)
 	VERSION_MAJOR_ID=$(shell echo ${VERSION_ID} | cut -d. -f1)
 endif
-WHO := $(shell whoami)
-HOME := $(shell echo ~)
-HOME_ROOT := $(shell echo ~root)
-PWD := $(shell pwd | sed -e 's/\//\\\\\//g')
-HOSTNAME := $(shell hostname)
-DOCKER := $(shell which docker)
-
-
-DOCKER_CONTAINER_TAG := $(tag)
-DOCKER_CONTAINER_NAME := $(name)
-TLD := $(tld)
-
 include conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk
 
+_checkDockerIsUp:
+ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yess) || echo no),no)
+	@echo "Docker is not up! Network docker0 interface was not found"
+	@echo ""
+	@exit 1
+endif
 
-welcome:
+welcome: _checkDockerIsUp
 	@printf "\033[33m     _            _                      _            \n"
 	@printf "\033[33m  __| | ___   ___| | _____ _ __       __| |_ __  ___  \n"
 	@printf "\033[33m / _\` |/ _ \ / __| |/ / _ \ '__|____ / _\` | '_ \/ __| \n"
@@ -91,7 +97,7 @@ endif
 	@make uninstall-os
 endif
 
-show-domain: ## View the docker domain installed
+show-domain: _checkDockerIsUp ## View the docker domain installed
 ifeq ('$(docker inspect ${DOCKER_CONTAINER_TAG})', '[]')
 	@echo "docker-dns not installed! Please install first"
 else
