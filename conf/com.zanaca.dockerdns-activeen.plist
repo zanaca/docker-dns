@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" \
+ "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.zanaca.dockerdns-tunnel</string>
+
+  <key>LowPriorityIO</key>
+  <true/>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>{PWD}/conf/bin/macos-active-ip.sh update-resolver {TLD}</string>
+  </array>
+
+  <key>WatchPaths</key>
+  <array>
+    <string>/etc/resolv.conf</string>
+    <string>/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist</string>
+    <string>/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardErrorPath</key>
+	<string>/var/log/dockerdns-tunnel.log</string>
+
+  <key>UserName</key>
+	<string>root</string>
+
+</dict>
+</plist>

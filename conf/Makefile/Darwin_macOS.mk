@@ -21,8 +21,11 @@ endif
 	@if [ ! -d /etc/resolver ]; then sudo mkdir /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
 	@[ ! -f /etc/resolver/$(TLD) ] && echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
+	@sudo sh -c "cat conf/com.zanaca.dockerdns-activeen.plist | sed s:\{PWD\}:$(PWD):g | sed s:\{TLD\}:$(TLD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist"
 	@echo Loading tunnel service
 	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 1>/dev/null 2>/dev/null
+	@echo Loading active interface service
+	@sudo launchctl load -w /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist 1>/dev/null 2>/dev/null
 
 
 
@@ -48,7 +51,9 @@ uninstall-os:
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts_pre_hud ]"; then sudo cp `echo ~root`/.ssh/known_hosts_pre_hud `echo ~root`/.ssh/known_hosts; fi
 	@echo Unloading tunnel service
 	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 2> /dev/null
+	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist 2> /dev/null
 	@echo Deleting tunnel service
 	@test -e /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist && sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
+	@test -e /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist && sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist
 	@echo Removing certifiactes for $(TLD) from $(DOCKER_CONF_FOLDER)
 	@sudo sh -c "rm $(DOCKER_CONF_FOLDER)/$(TLD).* 1> /dev/null 2> /dev/null"
