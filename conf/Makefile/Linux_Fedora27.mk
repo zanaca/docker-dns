@@ -14,7 +14,8 @@ install-dependencies-os:
 install-os:
 
 uninstall-os:
-	@if [ -d /etc/resolver ] then; \
-	grep -v "nameserver ${IP}" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp ; sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head; \
-	fi
-	@sudo resolvconf -u
+	@if [ -d /etc/resolver ]; then \
+		grep -v "nameserver ${IP}" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp ; \
+		sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head; \
+	fi;
+	@test resolvconf && sudo resolvconf -u
