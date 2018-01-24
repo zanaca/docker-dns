@@ -66,7 +66,7 @@ ifneq ($(shell grep $(IP) $(RESOLVCONF)), nameserver $(IP))
 	@echo "nameserver $(IP)" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
 endif
 	@make install-dependencies-os
-
+endif
 
 install: welcome build-docker-image install-dependencies ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
 	@if [ `$(DOCKER) container inspect $(DOCKER_CONTAINER_NAME) 1>&1 2>/dev/null | head -n1` = "[" ]; then \
@@ -103,7 +103,7 @@ endif
 	@sudo rm -Rf $(DNSMASQ_LOCAL_CONF) 2> /dev/null 1> /dev/null
 	@if [ -f "$(DOCKER_CONF_FOLDER)/daemon.json" ]; then sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq 'map(del(.bip, .dns)' > /tmp/daemon.docker.json.tmp 2>/dev/null; sudo mv /tmp/daemon.docker.json.tmp $(DOCKER_CONF_FOLDER)/daemon.json > /dev/null; fi
 	@make uninstall-os
-endif
+
 
 show-domain: _check-docker-is-up ## View the docker domain installed
 ifeq ('$(docker inspect ${DOCKER_CONTAINER_TAG})', '[]')
