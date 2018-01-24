@@ -35,7 +35,7 @@ ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yes) || echo n
 	@exit 1
 endif
 ifeq ($(shell groups ${WHO} | grep -q -E ' docker' || echo no),no)
-	@echo "You do not have permission to run Docker! Try to use a new session"
+	@echo "You do not have permission to run Docker! Try logging out and on again."
 	@echo ""
 	@exit 1
 endif
