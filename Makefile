@@ -21,7 +21,7 @@ TLD := $(tld)
 -include /etc/os-release
 ifeq (${UNAME},Darwin)
 	NAME=macOS
-	VERSION_MAJOR_ID :=
+	VERSION_MAJOR_ID := $(shell sw_vers -productVersion | cut -d. -f1-2)
 else
 	NAME := $(shell echo ${NAME} | sed -e s/\"//g)
 	VERSION_MAJOR_ID=$(shell echo ${VERSION_ID} | cut -d. -f1)
