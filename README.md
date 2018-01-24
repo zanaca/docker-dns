@@ -36,21 +36,22 @@ Example:
 Will create a docker image name *dns* and it will be available as *dns.docker.dev* so you could run `dig www.google.com @dns.docker.dev`
 
 ### Requirements
- - [Docker CE](https://www.docker.com/docker-ubuntu) or [Docker for mac](https://www.docker.com/docker-mac)
+ - [Docker CE](https://www.docker.com) or [Docker for mac](https://www.docker.com/docker-mac)
  - [Homebrew](https://brew.sh/) for macOS machines
 
 
 ### Tested enviroment
  - Docker 17.0.4.0-ce
  - Docker for mac 17.06.0-ce -> 17.09.1-ce-mac42
- - Ubuntu 16.04 -> 17.10
- - macOS Sierra -> High Sierra
+ - Ubuntu: 16.04, 17.10
+ - Fedora: 27
+ - macOS: Sierra, High Sierra
 
 
 
 ### Troubleshooting
 
-If you are using macOS, on restart, you will loose access to your containers. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `make tunnel` from docker-dns folder
+If you are using macOS, on restart, you will loose access to your containers. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo make tunnel` from docker-dns folder
 
 
 ### License
