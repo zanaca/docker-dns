@@ -42,7 +42,7 @@ install-os:
 	@sed -i '' 's/\s#bind-interfaces//' $(DNSMASQ_LOCAL_CONF)
 	@sed -i '' 's/interface=docker.*//' $(DNSMASQ_LOCAL_CONF)
 	@echo Generating known_hosts backup for user "root", if necessary
-	@test -d $(HOME_ROOT)/.ssh || (mkdir $(HOME_ROOT)/.ssh; chmod 700 $(HOME_ROOT)/.ssh)
+	@sudo test -d $(HOME_ROOT)/.ssh || (sudo mkdir $(HOME_ROOT)/.ssh; sudo chmod 700 $(HOME_ROOT)/.ssh)
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts ]"; then sudo cp $(HOME_ROOT)/.ssh/known_hosts $(HOME_ROOT)/.ssh/known_hosts_pre_hud; fi
 	@echo Adding key to known_hosts for user "root"
 	@sleep 3 && ssh-keyscan -p `docker port $(DOCKER_CONTAINER_NAME) | grep 22/ | cut -d: -f2` 127.0.0.1 | grep ecdsa-sha2-nistp256 | sudo tee -a $(HOME_ROOT)/.ssh/known_hosts
