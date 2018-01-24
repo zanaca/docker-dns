@@ -29,6 +29,7 @@ endif
 include conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk
 
 _check-docker-is-up:
+ifneq (${UNAME},Darwin)
 ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yes) || echo no),no)
 	@echo "Docker is not up! Network docker0 interface was not found"
 	@echo ""
@@ -38,6 +39,7 @@ ifeq ($(shell groups ${WHO} | grep -q -E ' docker' || echo no),no)
 	@echo "You do not have permission to run Docker! Try to use a new session"
 	@echo ""
 	@exit 1
+endif
 endif
 
 
@@ -112,4 +114,4 @@ else
 endif
 
 help: welcome
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep ^help -v | sort | awk 'BEGIN {FS = ":([^:]*)? ## "};  {gsub("Makefile:","",$$1); printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep ^help -v | sort | awk 'BEGIN {FS = ":([^:]*)? ## "};  {gsub("Makefile:","",$$1); split($$1,a,".mk:"); if(length(a)>1){$$1=a[2]}; printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
