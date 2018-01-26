@@ -12,14 +12,14 @@ PACKAGE_MANAGER=apt-get
 install-dependencies-os:
 	@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
 	@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
-	@echo "options timeout:1 #docker-dns\nnameserver $(IP) #docker-dns" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
+	@echo "options timeout:1 #@docker-dns\nnameserver $(IP) #@docker-dns" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
 	@sudo resolvconf -u
 
 install-os:
 
 uninstall-os:
 	@if [ -f /etc/resolvconf/resolv.conf.d/head ]; then \
-		sudo grep -v "#docker-dns" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
+		sudo grep -v "@docker-dns" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
 		sudo mv /tmp/resolv.conf.tmp  /etc/resolvconf/resolv.conf.d/head; \
 	fi
 	@test resolvconf && sudo resolvconf -u
