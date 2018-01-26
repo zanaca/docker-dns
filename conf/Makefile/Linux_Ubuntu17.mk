@@ -10,17 +10,13 @@ RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
 PACKAGE_MANAGER=apt-get
 
 install-dependencies-os:
-	#@if [ ! -d /etc/resolver ]; then sudo mkdir -p /etc/resolver; sudo touch /etc/resolver/$(TLD); fi
-	#@echo "nameserver $(IP)" | sudo cat - /etc/resolver/$(TLD) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD)
-	#@if [ ! -d /etc/resolver/resolv.conf.d ]; then sudo mkdir -p /etc/resolver/resolv.conf.d; fi
-	#@if [ ! -f /etc/resolver/resolv.conf.d/head ]; then sudo touch /etc/resolver/resolv.conf.d/head; fi
-	#@echo "nameserver $(IP)" | sudo tee -a /etc/resolver/resolv.conf.d/head;
 
 install-os:
 
 uninstall-os:
-	@if [ -d /etc/resolver ]; then \
-		grep -v "nameserver ${IP}" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
-		sudo mv /tmp/resolv.conf.tmp  /etc/resolvconf/resolv.conf.d/head; \
+	@sudo grep -v "#docker-dns" ${RESOLVCONF} > /tmp/resolv.conf.tmp; \
+	sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
+
+	@if [ -f /etc/resolvconf/resolv.conf.d/head ]; then \
+			sudo grep -v "#docker-dns" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
 	fi
-	@test resolvconf && sudo resolvconf -u

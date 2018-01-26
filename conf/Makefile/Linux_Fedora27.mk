@@ -14,8 +14,8 @@ install-dependencies-os:
 install-os:
 
 uninstall-os:
-	@if [ -d /etc/resolver ]; then \
-		grep -v "nameserver ${IP}" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp ; \
+	@if [ -f /etc/resolver/resolv.conf.d/head ]; then \
+		sudo grep -v "#docker-dns" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
 		sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head; \
 	fi;
 	@test resolvconf && sudo resolvconf -u
