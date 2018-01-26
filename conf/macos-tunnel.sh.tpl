@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+source ./conf/bin/macos-tap-interface.sh
+
 while [ $(docker port {DOCKER_CONTAINER_NAME} 2>&1 | grep 22/ | cut -d: -f2 | wc -l)  -eq 0 ]; do
     echo $(date) - Waiting for docker-dns container to be ready
     sleep 1;
