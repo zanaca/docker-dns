@@ -15,7 +15,7 @@ install-os:
 
 uninstall-os:
 	@if [ -f /etc/resolver/resolv.conf.d/head ]; then \
-		sudo grep -v "#docker-dns" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
+		sudo grep -v "@docker-dns" /etc/resolver/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
 		sudo mv /tmp/resolv.conf.tmp /etc/resolver/resolv.conf.d/head; \
 	fi;
 	@test resolvconf && sudo resolvconf -u

@@ -14,9 +14,9 @@ install-dependencies-os:
 install-os:
 
 uninstall-os:
-	@sudo grep -v "#docker-dns" ${RESOLVCONF} > /tmp/resolv.conf.tmp; \
+	@sudo grep -v "@docker-dns" ${RESOLVCONF} > /tmp/resolv.conf.tmp; \
 	sudo mv /tmp/resolv.conf.tmp ${RESOLVCONF};
 
 	@if [ -f /etc/resolvconf/resolv.conf.d/head ]; then \
-			sudo grep -v "#docker-dns" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
+		sudo grep -v "@docker-dns" /etc/resolvconf/resolv.conf.d/head > /tmp/resolv.conf.tmp; \
 	fi

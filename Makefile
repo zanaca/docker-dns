@@ -62,8 +62,8 @@ else
 install-dependencies:
 	@[ `sudo -n true 2>/dev/null` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
 	@sudo ${PACKAGE_MANAGER} install `cat requirements.apt` -y
-ifneq ($(shell grep \#docker-dns $(RESOLVCONF) |wc -l|bc),0)
-	@echo "options timeout:1 #docker-dns\nnameserver $(IP) #docker-dns" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
+ifeq ($(shell grep @docker-dns $(RESOLVCONF) | wc -l | bc ),0)
+	@echo "options timeout:1 #@docker-dns\nnameserver $(IP) #@docker-dns" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
 endif
 	@make install-dependencies-os
 endif
@@ -93,7 +93,7 @@ install: welcome build-docker-image install-dependencies ## Setup DNS container 
 
 uninstall: welcome ## Remove all files from docker-dns
 	@echo "Uninstalling docker dns exposure"
-ifneq ($(shell docker images | grep ${DOCKER_CONTAINER_NAME} | wc -l | bc), 0)
+ifneq ($(shell docker images | grep "${DOCKER_CONTAINER_NAME}" | wc -l | bc), 0)
 	@echo "- Stopping container if necessary"
 	@$(DOCKER) stop $(DOCKER_CONTAINER_NAME) || echo Could not stop container $(DOCKER_CONTAINER_NAME)
 	@$(DOCKER) rm $(DOCKER_CONTAINER_NAME) || echo Could not remove container $(DOCKER_CONTAINER_NAME)
