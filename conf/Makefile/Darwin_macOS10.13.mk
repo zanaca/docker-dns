@@ -1,6 +1,6 @@
 OS_VERSION=Macos$(shell sw_vers -productVersion | cut -d. -f1-2)
 LOOPBACK := ''
-IP := $(shell ./conf/bin/macos-active-ip.sh)
+IP=172.17.0.1
 DOCKER_CONF_FOLDER := $(HOME)/Library/Containers/com.docker.docker/Data/database/com.docker.driver.amd64-linux/etc/docker
 DNSs := $(shell scutil --dns | grep nameserver | cut -d: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
 DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
@@ -20,12 +20,9 @@ endif
 	@which sshuttle || sudo easy_install sshuttle
 	@if [ ! -d /etc/resolver ]; then \
 		sudo mkdir /etc/resolver; \
-		sudo touch /etc/resolver/$(TLD); \
 	fi
-	@if [ ! -f /etc/resolver/$(TLD) ]; then \
-		echo "nameserver $(IP)" > /tmp/docker-dns-resolv; \
-		sudo mv /tmp/docker-dns-resolv /etc/resolver/$(TLD); \
-	fi
+	@sudo sh -c "rm -f /etc/resolver/$(TLD)";
+	@echo "nameserver $(IP)" | sudo tee /etc/resolver/$(TLD);
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-tunnel.plist | sed s:\{PWD\}:$(PWD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist"
 	@sudo sh -c "cat conf/com.zanaca.dockerdns-activeen.plist | sed s:\{PWD\}:$(PWD):g | sed s:\{TLD\}:$(TLD):g > /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist"
 	@echo Loading tunnel service
@@ -54,6 +51,7 @@ install-os:
 
 
 uninstall-os:
+	@sudo sh -c "rm -f /etc/resolver/$(TLD)";
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts_pre_hud ]"; then sudo cp `echo ~root`/.ssh/known_hosts_pre_hud `echo ~root`/.ssh/known_hosts; fi
 	@echo Unloading tunnel service
 	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 2> /dev/null
@@ -63,3 +61,4 @@ uninstall-os:
 	@test -e /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist && sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist
 	@echo Removing certifiactes for $(TLD) from $(DOCKER_CONF_FOLDER)
 	@sudo sh -c "rm $(DOCKER_CONF_FOLDER)/$(TLD).* 1> /dev/null 2> /dev/null"
+	@[[ -f /tmp/sshuttle.pid ]] && kill $(shell cat /tmp/sshuttle.pid)
