@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 .PHONY: help
 
-tag ?= ns0
-tld ?= docker
-name ?= $(tag)
+tag ?= $(shell test -f .cache/tag && cat .cache/tag || echo 'ns0')
+tld ?= $(shell test -f .cache/tld && cat .cache/tld || echo 'docker')
+name ?= $(shell test -f .cache/name && cat .cache/name || echo '${tag}')
 
 DOCKER_INTERFACE=docker0
 UNAME := $(shell uname)
@@ -68,7 +68,14 @@ endif
 	@make install-dependencies-os
 endif
 
-install: welcome build-docker-image install-dependencies ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
+update-conf:
+	@test -d .cache || mkdir .cache
+	@echo ${DOCKER_CONTAINER_TAG} > .cache/tag
+	@echo ${DOCKER_CONTAINER_NAME} > .cache/name
+	@echo ${TLD} > .cache/tld
+	
+
+install: welcome update-conf build-docker-image install-dependencies ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
 	@if [ `$(DOCKER) container inspect $(DOCKER_CONTAINER_NAME) 1>&1 2>/dev/null | head -n1` = "[" ]; then \
 		echo "Stopping existing instance"; \
 		$(DOCKER) stop $(DOCKER_CONTAINER_NAME) 1> /dev/null 2> /dev/null; \
