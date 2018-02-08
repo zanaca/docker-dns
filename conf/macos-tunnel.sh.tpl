@@ -15,4 +15,4 @@ mv .known_hosts $HOME_ROOT/.ssh/known_hosts
 
 echo $(date) - Starting sshuttle
 PORT=$(docker port {DOCKER_CONTAINER_NAME} 2>&1 | grep 22/ | cut -d: -f2)
-/usr/local/bin/sshuttle -vv --pidfile=/tmp/sshuttle.pid -r root@127.0.0.1:$PORT 172.17.0.0/24 ||  echo $(date) - Error loading sshuttle
+/usr/local/bin/sshuttle --pidfile=/tmp/sshuttle.pid -r root@127.0.0.1:$PORT 172.17.0.0/24 ||  echo $(date) - Error loading sshuttle
