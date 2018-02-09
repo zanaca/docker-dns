@@ -13,7 +13,7 @@ install-dependencies-os:
 	@if [ ! -d /etc/resolvconf/resolv.conf.d ]; then sudo mkdir -p /etc/resolvconf/resolv.conf.d; fi
 	@if [ ! -f /etc/resolvconf/resolv.conf.d/head ]; then sudo touch /etc/resolvconf/resolv.conf.d/head; fi
 	@echo "options timeout:1 #@docker-dns\nnameserver $(IP) #@docker-dns" | sudo tee -a /etc/resolvconf/resolv.conf.d/head;
-	@sudo resolvconf -u
+	@test resolvconf && sudo resolvconf -u
 
 install-os:
 
