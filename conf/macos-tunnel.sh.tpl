@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-HOME_ROOT=$(shell echo ~root)
+HOME_ROOT=$(echo ~root)
 
 ifconfig lo0 alias 172.17.0.1
 
