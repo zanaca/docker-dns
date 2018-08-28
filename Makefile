@@ -26,7 +26,11 @@ else
 	NAME := $(shell echo ${NAME} | sed -e s/\"//g)
 	VERSION_MAJOR_ID=$(shell echo ${VERSION_ID} | cut -d. -f1)
 endif
-include conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk
+ifeq ("$(wildcard ./conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk)","")
+	include conf/Makefile/${UNAME}_Empty.mk
+else
+    include conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk
+endif
 
 _check-docker-is-up:
 ifneq (${UNAME},Darwin)
