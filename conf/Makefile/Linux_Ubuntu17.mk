@@ -16,6 +16,8 @@ install-dependencies-os:
 	@test resolvconf && sudo resolvconf -u
 
 install-os:
+	@echo Setting up dnsmasq
+	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
 
 uninstall-os:
 	@sudo grep -v "@docker-dns" ${RESOLVCONF} > /tmp/resolv.conf.tmp; \

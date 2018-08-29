@@ -32,15 +32,17 @@ else
     include conf/Makefile/${UNAME}_${NAME}${VERSION_MAJOR_ID}.mk
 endif
 
-_check-docker-is-up:
-ifneq (${UNAME},Darwin)
-ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yes) || echo no),no)
-	@echo "Docker is not up! Network docker0 interface was not found"
+_check-docker-permissions:
+ifeq ($(shell groups ${WHO} | grep -q -E ' docker' || echo no),no)
+	@echo "You do not have permission to run Docker! Try logging out and on again."
 	@echo ""
 	@exit 1
 endif
-ifeq ($(shell groups ${WHO} | grep -q -E ' docker' || echo no),no)
-	@echo "You do not have permission to run Docker! Try logging out and on again."
+
+_check-docker-is-up: _check-docker-permissions
+ifneq (${UNAME},Darwin)
+ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yes) || echo no),no)
+	@echo "Docker is not up! Network docker0 interface was not found"
 	@echo ""
 	@exit 1
 endif
@@ -79,27 +81,32 @@ update-conf:
 	@echo ${TLD} > .cache/tld
 	
 
-install: welcome update-conf build-docker-image install-dependencies ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
-	@if [ `$(DOCKER) container inspect $(DOCKER_CONTAINER_NAME) 1>&1 2>/dev/null | head -n1` = "[" ]; then \
-		echo "Stopping existing instance"; \
-		$(DOCKER) stop $(DOCKER_CONTAINER_NAME) 1> /dev/null 2> /dev/null; \
-		$(DOCKER) rm $(DOCKER_CONTAINER_NAME) 1> /dev/null 2> /dev/null; \
-	fi
-	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
-	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
-	@echo Setting up dnsmasq
-	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
-	@echo Generating certificate for $(TLD) domain, if necessary
-	@test -f conf/certs.d/$(TLD).key || openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
-	@echo Copying certificate to $(DOCKER_CONF_FOLDER) if necessary
-	@sudo sh -c "cp -a conf/certs.d/$(TLD).* $(DOCKER_CONF_FOLDER)"
+start-docker-container: _check-docker-is-up
 	@while [ `$(DOCKER) ps 1> /dev/null` ]; do \
 		echo "Waiting for Docker..."; \
 		sleep 2; \
 	done;
 	@echo Starting $(DOCKER_CONTAINER_NAME) container...
 	@$(DOCKER) run -d --name $(DOCKER_CONTAINER_NAME) --restart always --security-opt apparmor:unconfined -p $(PUBLISH_IP_MASK)53:53/udp -p $(PUBLISH_IP_MASK)53:53 -P -e TOP_LEVEL_DOMAIN=$(TLD) -e HOSTNAME=$(HOSTNAME) -e HOSTUNAME=$(shell uname) --volume /var/run/docker.sock:/var/run/docker.sock $(DOCKER_CONTAINER_TAG) -R
-	@make install-os
+
+stop-docker-container: _check-docker-is-up
+	@if [ `$(DOCKER) container inspect $(DOCKER_CONTAINER_NAME) 1>&1 2>/dev/null | head -n1` = "[" ]; then \
+		echo "Stopping existing instance"; \
+		$(DOCKER) stop $(DOCKER_CONTAINER_NAME) 1> /dev/null 2> /dev/null; \
+		$(DOCKER) rm $(DOCKER_CONTAINER_NAME) 1> /dev/null 2> /dev/null; \
+	fi
+
+setup-docker-daemon-config:
+	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
+	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
+
+setup-docker-domain-certificate:
+	@echo Generating certificate for $(TLD) domain, if necessary
+	@test -f conf/certs.d/$(TLD).key || openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
+	@echo Copying certificate to $(DOCKER_CONF_FOLDER) if necessary
+	@sudo sh -c "cp -a conf/certs.d/$(TLD).* $(DOCKER_CONF_FOLDER)"
+
+install: welcome update-conf build-docker-image install-dependencies stop-docker-container setup-docker-daemon-config start-docker-container install-os ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
 	@echo Now all of your containers are reachable using CONTAINER_NAME.$(TLD) inside and outside docker.  E.g.: nc -v $(DOCKER_CONTAINER_NAME).$(TLD) 53
 
 uninstall: welcome ## Remove all files from docker-dns
