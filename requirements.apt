@@ -2,3 +2,4 @@ jq
 net-tools
 make
 gawk
+resolvconf
