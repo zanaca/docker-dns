@@ -54,11 +54,11 @@ uninstall-os:
 	@sudo sh -c "rm -f /etc/resolver/$(TLD)";
 	@if sudo sh -c "[ -e $(HOME_ROOT)/.ssh/known_hosts_pre_hud ]"; then sudo cp `echo ~root`/.ssh/known_hosts_pre_hud `echo ~root`/.ssh/known_hosts; fi
 	@echo Unloading tunnel service
-	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 2> /dev/null
-	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist 2> /dev/null
+	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist 2> /dev/null || echo 'com.zanaca.dockerdns-tunnel.plist not unloaded'
+	@sudo launchctl unload -w /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist 2> /dev/null || echo 'com.zanaca.dockerdns-activeen.plist not unloaded'
 	@echo Deleting tunnel service
-	@test -e /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist && sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist
-	@test -e /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist && sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist
-	@echo Removing certifiactes for $(TLD) from $(DOCKER_CONF_FOLDER)
-	@sudo sh -c "rm $(DOCKER_CONF_FOLDER)/$(TLD).* 1> /dev/null 2> /dev/null"
-	@[[ -f /tmp/sshuttle.pid ]] && kill $(shell cat /tmp/sshuttle.pid)
+	@sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist || echo 'com.zanaca.dockerdns-tunnel.plist not found'
+	@sudo rm -f /Library/LaunchDaemons/com.zanaca.dockerdns-activeen.plist || echo 'com.zanaca.dockerdns-activeen.plist not found'
+	@echo Removing certificates for \"$(TLD)\" from \"$(DOCKER_CONF_FOLDER)\"
+	@sudo /bin/rm $(DOCKER_CONF_FOLDER)/$(TLD).* 2> /dev/null || echo 'No certificates found'
+	@[[ -f /tmp/sshuttle.pid ]] && kill $(shell cat /tmp/sshuttle.pid 2>/dev/null) || echo 'Not stopping sshuttle'
