@@ -40,7 +40,7 @@ ifeq ($(shell (ifconfig docker0 1> /dev/null 2> /dev/null && echo yes) || echo n
 	@exit 1
 endif
 ifeq ($(shell groups ${WHO} | grep -q -E ' docker' || echo no),no)
-	@echo "You do not have permission to run Docker! Try logging out and on again."
+	@echo "You do not have permission to run Docker! Try logging out and on again or adding your user to docker group."
 	@echo ""
 	@exit 1
 endif
@@ -57,18 +57,22 @@ welcome: _check-docker-is-up
 	@printf "\033[m\n"
 
 build-docker-image:
+	@echo "Building Docker container"
 	@[ -f Dockerfile_id_rsa ] || ssh-keygen -f Dockerfile_id_rsa -P ""
+	@sleep 1
 	@$(DOCKER) build . -t $(DOCKER_CONTAINER_TAG):latest
 
 ifeq ($(UNAME), Darwin)
 install-dependencies: install-dependencies-macos
 else
 install-dependencies:
+	@echo "Installing dependencies"
 	@[ `sudo -n true 2>/dev/null` ]; printf "\033[32mPlease type your sudo password, for network configuration.\033[m\n" && sudo ls > /dev/null
-	@sudo ${PACKAGE_MANAGER} install `cat requirements.apt` -y
+	@sudo ${PACKAGE_MANAGER} install -y `cat requirements.apt`
 ifeq ($(shell grep @docker-dns $(RESOLVCONF) | wc -l | bc ),0)
 	@echo "options timeout:1 #@docker-dns\nnameserver $(IP) #@docker-dns" | sudo cat - $(RESOLVCONF) > /tmp/docker-dns-resolv; sudo mv /tmp/docker-dns-resolv $(RESOLVCONF)
 endif
+	@echo "Installing specific OS dependencies"
 	@make install-dependencies-os
 endif
 
