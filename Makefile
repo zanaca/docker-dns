@@ -81,7 +81,7 @@ update-conf:
 	@echo ${DOCKER_CONTAINER_TAG} > .cache/tag
 	@echo ${DOCKER_CONTAINER_NAME} > .cache/name
 	@echo ${TLD} > .cache/tld
-	
+
 
 install: welcome update-conf build-docker-image install-dependencies ## Setup DNS container to resolve ENV.TLD domain inside and outside docker in your machine
 	@if [ `$(DOCKER) container inspect $(DOCKER_CONTAINER_NAME) 1>&1 2>/dev/null | head -n1` = "[" ]; then \
@@ -125,7 +125,7 @@ ifeq ('$(docker inspect ${DOCKER_CONTAINER_TAG})', '[]')
 	@echo "docker-dns not installed! Please install first"
 else
 	@echo Working domain:
-	@$(DOCKER) inspect $(DOCKER_CONTAINER_TAG) | grep TOP_ | cut -d= -f2 | cut -d\" -f1
+	@$(DOCKER) exec $(DOCKER_CONTAINER_NAME) sh -c 'echo $$TOP_LEVEL_DOMAIN'
 endif
 
 help: welcome
