@@ -1,7 +1,7 @@
 domain-needed
 bogus-priv
 server=8.8.8.8
-server=8.8.4.4
+server=1.1.1.1
 {{ define "host" }}
     {{ $host := .Host }}
     {{ $tld := .Tld }}
