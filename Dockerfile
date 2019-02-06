@@ -17,14 +17,14 @@ ADD conf/dnsmasq.tpl /root/dnsmasq.tpl
 ADD dnsmasq-restart.sh /root/dnsmasq-restart.sh
 ADD Dockerfile_entrypoint.sh /root/entrypoint.sh
 ADD Dockerfile_id_rsa.pub /root/.ssh/authorized_keys
-RUN mkdir /root/.ssh && chmod 700 /root/.ssh \
-    chmod 600 /root/.ssh/authorized_keys
+RUN /bin/chmod 700 /root/.ssh; \
+    /bin/chmod 600 /root/.ssh/authorized_keys
 ENTRYPOINT ["/root/entrypoint.sh"]
 
-RUN sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config \
-    sed -i s/#Compression.*/Compression\ no/ /etc/ssh/sshd_config \
-    sed -i s/#PermitEmptyPasswords.*/PermitEmptyPasswords\ yes/ /etc/ssh/sshd_config \
-    sed -i s/#PermitTunnel.*/PermitTunnel\ yes/ /etc/ssh/sshd_config \
-    sed -i s/#ChallengeResponseAuthentication.*/ChallengeResponseAuthentication\ no/ /etc/ssh/sshd_config
+RUN /bin/sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config; \
+    /bin/sed -i s/#Compression.*/Compression\ no/ /etc/ssh/sshd_config; \
+    /bin/sed -i s/#PermitEmptyPasswords.*/PermitEmptyPasswords\ yes/ /etc/ssh/sshd_config; \
+    /bin/sed -i s/#PermitTunnel.*/PermitTunnel\ yes/ /etc/ssh/sshd_config; \
+    /bin/sed -i s/#ChallengeResponseAuthentication.*/ChallengeResponseAuthentication\ no/ /etc/ssh/sshd_config
 
 RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf
