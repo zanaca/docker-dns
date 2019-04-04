@@ -3,4 +3,3 @@ net-tools
 make
 gawk
 resolvconf
-ipconfig
