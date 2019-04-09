@@ -10,7 +10,7 @@ ENV DOCKER_GEN_VERSION 0.7.3
 ENV DOCKER_HOST unix:///var/run/docker.sock
 ENV HOSTUNAME Linux
 RUN echo "nameserver 1.1.1.1" > /etc/resolv.conf \
-    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+    echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 RUN wget -qO- https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz | tar xvz -C /usr/local/bin
 ADD conf/dnsmasq.tpl /root/dnsmasq.tpl
