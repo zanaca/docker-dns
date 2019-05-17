@@ -27,4 +27,5 @@ RUN /bin/sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config;
     /bin/sed -i s/#PermitTunnel.*/PermitTunnel\ yes/ /etc/ssh/sshd_config; \
     /bin/sed -i s/#ChallengeResponseAuthentication.*/ChallengeResponseAuthentication\ no/ /etc/ssh/sshd_config
 
+RUN passwd -d root
 RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf
