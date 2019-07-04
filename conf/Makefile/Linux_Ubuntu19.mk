@@ -1,4 +1,4 @@
-OS_VERSION=Ubuntu17
+OS_VERSION=Ubuntu19
 LOOPBACK := $(shell ifconfig | grep -i LOOPBACK  | head -n1 | cut -d\  -f1 | sed -e 's\#:\#\#')
 IP := $(shell ifconfig ${DOCKER_INTERFACE} | grep "inet " | cut -dt -f2 | cut -d: -f2 | sed -e 's\# \#\#' | cut -d\  -f1)
 DOCKER_CONF_FOLDER := /etc/docker
