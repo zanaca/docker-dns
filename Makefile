@@ -92,7 +92,12 @@ install: welcome update-conf build-docker-image install-dependencies ## Setup DN
 	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
 	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
 	@echo Setting up dnsmasq
-	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp; sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"
+	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp
+	@if [ -f "${DNSMASQ_LOCAL_CONF}" ]; then \
+		sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"; \
+	else \
+		sudo mv -f /tmp/01_docker.tmp "$(NETWORKMANAGER_CONF_D)"; \
+	fi
 	@echo Generating certificate for $(TLD) domain, if necessary
 	@test -f conf/certs.d/$(TLD).key || openssl req -x509 -newkey rsa:4096 -keyout conf/certs.d/$(TLD).key -out conf/certs.d/$(TLD).cert -days 365 -nodes -subj "/CN=*.$(TLD)"
 	@echo Copying certificate to $(DOCKER_CONF_FOLDER) if necessary
