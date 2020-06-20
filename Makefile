@@ -92,6 +92,7 @@ install: welcome update-conf build-docker-image install-dependencies ## Setup DN
 	@if [ ! -f $(DOCKER_CONF_FOLDER)/daemon.json ]; then sudo sh -c "mkdir -p $(DOCKER_CONF_FOLDER); sudo cp conf/daemon.json.docker $(DOCKER_CONF_FOLDER)/daemon.json";  fi
 	@sudo cat $(DOCKER_CONF_FOLDER)/daemon.json | jq '. + {"bip": "${IP}/24", "dns": ["${IP}", "${DNSs}"]}' > /tmp/daemon.docker.json.tmp; sudo mv /tmp/daemon.docker.json.tmp "$(DOCKER_CONF_FOLDER)/daemon.json"
 	@echo Setting up dnsmasq
+	@echo ${DNSMASQ_LOCAL_CONF}
 	@cat conf/dnsmasq.local | sed s/\\$$\{IP\}/${IP}/g | sed s/\\$$\{TLD\}/${TLD}/ | sed s/\\$$\{HOSTNAME\}/${HOSTNAME}/ | sed s/\\$$\{LOOPBACK\}/${LOOPBACK}/ > /tmp/01_docker.tmp
 	@if [ -f "${DNSMASQ_LOCAL_CONF}" ]; then \
 		sudo mv -f /tmp/01_docker.tmp "$(DNSMASQ_LOCAL_CONF)"; \

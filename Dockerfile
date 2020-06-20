@@ -4,7 +4,7 @@ MAINTAINER Zanaca "carlos@zanaca.com"
 VOLUME /var/run
 EXPOSE 53/udp 53 22
 
-RUN apk --no-cache add dnsmasq openssl openssh python2
+RUN apk --no-cache add dnsmasq openssl openssh python3
 
 ENV DOCKER_GEN_VERSION 0.7.3
 ENV DOCKER_HOST unix:///var/run/docker.sock
