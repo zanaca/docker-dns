@@ -45,7 +45,7 @@ Will create a docker image name *dns* and it will be available as *dns.docker.de
  - Docker for mac 17.06.0-ce, 17.09.1-ce-mac42
  - Ubuntu: 16.04, 17.04, 17.10, 18.04, 20.04
  - Fedora: 27
- - macOS: Sierra, High Sierra
+ - macOS: Sierra, High Sierra, Mojave, Catalina
 
 
 
