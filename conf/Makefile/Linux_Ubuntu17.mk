@@ -5,6 +5,7 @@ DOCKER_CONF_FOLDER := /etc/docker
 DNSs := $(shell nmcli dev show | grep DNS|  cut -d\: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
 DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 DNSMASQ_LOCAL_CONF := /etc/NetworkManager/dnsmasq.d/01_docker
+NETWORKMANAGER_CONF_D:=/etc/NetworkManager/conf.d/01_docker
 PUBLISH_IP_MASK = $(IP):
 RESOLVCONF := /run/systemd/resolve/stub-resolv.conf
 PACKAGE_MANAGER=apt-get
