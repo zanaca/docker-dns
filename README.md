@@ -4,7 +4,7 @@ Docker DNS creates a container that works as a DNS for docker containers in you 
 
 It was created to allow you to work in a container as if was a "real" server setup. You will have access to all ports/services inside the container without need to expose all the ports. You can publish ports as well to access it like the old way. E.g.: 127.0.0.1:8080 -> container_ip:80
 
-It was tested on linux and macOS sierra. macOS environment has a downside that you will always run the `make tunnel` every time you boot the host machine,
+It was tested on linux and macOS sierra. macOS environment has a downside that you will always run the `make tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity just in case.
 
 The main usage is for development environment only, should not be used in production environment.
 
