@@ -6,14 +6,14 @@
     <string>com.zanaca.dockerdns-tunnel</string>
     <key>ProgramArguments</key>
     <array>
-      <string>{PWD}/macos-tunnel.sh</string>
+      <string>{PWD}/docker-dns tunnel</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardErrorPath</key>
-	  <string>/var/log/dockerdns-tunnel.log</string>
+	  <string>/tmp/dockerdns-tunnel.log</string>
 	  <key>UserName</key>
 	  <string>root</string>
   </dict>
