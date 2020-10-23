@@ -9,7 +9,7 @@ import network
 import tunnel
 
 
-PWD = os.path.dirname(os.path.dirname(__file__))
+PWD = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
@@ -18,7 +18,7 @@ APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
 def setup(tld=config.TOP_LEVEL_DOMAIN):
     if not os.path.isdir('/etc/resolver'):
         os.mkdir('/etc/resolver')
-    open('/etc/resolver/{config',
+    open('/etc/resolver/{tld}',
          'w').write(f'nameserver {docker.NETWORK_GATEWAY}')
 
     plist = open('src/templates/com.zanaca.dockerdns-tunnel.plist',
@@ -54,9 +54,8 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     keys = os.popen(f'ssh-keyscan -p {port} 127.0.0.1').read().split("\n")
     for key in keys:
         if 'ecdsa-sha2-nistp256' in key:
+            print('Adding key to known_hosts for user "root"')
             open(KNOWN_HOSTS_FILE, 'a+').write(f"\n{key}\n")
-
-    print('Adding key to known_hosts for user "root"')
 
     if not os.path.exists(APP_DESTINATION):
         shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
@@ -68,4 +67,27 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     tunnel.connect(daemon=True)
 
 
-def install(tld=config.TOP_LEVEL_DOMAIN):
+def uninstall(tld=config.TOP_LEVEL_DOMAIN):
+    if os.path.exists(f'/etc/resolver/{tld}'):
+        print('Removing resolver file')
+        os.unlink(f'/etc/resolver/{tld}')
+    if os.path.exists(PLIST_PATH):
+        print('Removing tunnel service')
+        os.system(
+            f'sudo launchctl unload -w {PLIST_PATH} 1>/dev/null 2>/dev/null')
+        os.unlink(PLIST_PATH)
+    if os.path.exists(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns'):
+        print('Removing kwown_hosts backup')
+        os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
+
+    if os.path.exists(APP_DESTINATION):
+        print('Removing tunnel app')
+        for filename in os.listdir(APP_DESTINATION):
+            file_path = os.path.join(APP_DESTINATION, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
