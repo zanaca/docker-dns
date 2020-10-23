@@ -7,7 +7,6 @@ import config
 import dockerapi as docker
 import util
 import network
-import tunnel
 
 if util.on_macos:
     import OSes.darwin as OS
@@ -59,7 +58,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         time.sleep(2)
 
     print(
-        f'Building and starting container "{tag}:latest"... Please wait')
+        f'Building and running container "{tag}:latest"... Please wait')
     docker.build_container(name, tag, tld)
     update_cache()
 
