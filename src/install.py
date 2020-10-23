@@ -15,12 +15,13 @@ if util.on_wsl:
     import OSes.debian as OS
 
 if util.on_linux:
-        if config.HOSTUNAME == 'Ubuntu':
-            import OSes.debian as OS
-        else:
-            import OSes.redhat as OS
+    if config.HOSTUNAME == 'Ubuntu':
+        import OSes.debian as OS
+    else:
+        import OSes.redhat as OS
 
 RESOLVCONF = '/etc/resolv.conf'
+
 
 def update_cache():
     util.write_cache('tld', config.TOP_LEVEL_DOMAIN)
@@ -42,14 +43,15 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
 
     # docker
     DOCKER_CONF_FILE = f"{os_config['DOCKER_CONF_FOLDER']}/daemon.json"
-    if not os.path.exists(DOCKER_CONF_FILE) or os.stat(DOCKER_CONF_FILE).st_size==0 :
+    if not os.path.exists(DOCKER_CONF_FILE) or os.stat(DOCKER_CONF_FILE).st_size == 0:
         if not os.path.isdir(os_config['DOCKER_CONF_FOLDER']):
             os.mkdir(os_config['DOCKER_CONF_FOLDER'])
         shutil.copy2('src/templates/daemon.json', DOCKER_CONF_FILE)
 
     docker_json = json.loads(open(DOCKER_CONF_FILE, 'r').read())
     docker_json['bip'] = docker.NETWORK_SUBNET
-    docker_json['dns'] = list(set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
+    docker_json['dns'] = list(
+        set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
     json.dump(docker_json, open(DOCKER_CONF_FILE, 'w'))
 
     if docker.check_exists(name):
@@ -69,12 +71,13 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         dnsmasq_local = open(os_config['DNSMASQ_LOCAL_CONF'], 'r').read()
         dnsmasq_local = dnsmasq_local.replace('${IP}', docker.NETWORK_GATEWAY)
         dnsmasq_local = dnsmasq_local.replace('${HOSTNAME}', config.HOSTNAME)
-        dnsmasq_local = dnsmasq_local.replace('${LOOPBACK}', network.LOOPBACK_NETWORK_NAME)
+        dnsmasq_local = dnsmasq_local.replace(
+            '${LOOPBACK}', network.LOOPBACK_NETWORK_NAME)
         json.dump(dnsmasq_local, open(os_config['DNSMASQ_LOCAL_CONF'], 'w'))
 
     # TLD domain ceriticate
-    cert_file=f'conf/certs.d/{tld}.cert'
-    key_file=f'conf/certs.d/{tld}.key'
+    cert_file = f'conf/certs.d/{tld}.cert'
+    key_file = f'conf/certs.d/{tld}.key'
     util.generate_certificate(tld, cert_file=cert_file, key_file=key_file)
     shutil.copy2(cert_file, os_config['DOCKER_CONF_FOLDER'])
     shutil.copy2(key_file, os_config['DOCKER_CONF_FOLDER'])
