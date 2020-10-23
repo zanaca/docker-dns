@@ -60,7 +60,6 @@ parser.add_argument(
     """
 )
 
-x = 2
 if __name__ == '__main__':
     if not util.is_supported():
         print('Sorry, your OS is not supported.')
