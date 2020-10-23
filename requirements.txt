@@ -3,3 +3,4 @@ netifaces
 sshuttle
 pycryptodome
 pyOpenSSL
+dnspython
