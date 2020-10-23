@@ -9,7 +9,7 @@ import network
 import tunnel
 
 
-PWD = os.path.dirname(os.path.dirname(__file__))
+PWD = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
@@ -68,4 +68,5 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     tunnel.connect(daemon=True)
 
 
-def install(tld=config.TOP_LEVEL_DOMAIN):
+def uninstall(tld=config.TOP_LEVEL_DOMAIN):
+    print('WIP')
