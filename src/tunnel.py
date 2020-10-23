@@ -22,8 +22,8 @@ def connect(daemon=False, verbose=False):
     docker_container_name = config.DOCKER_CONTAINER_NAME
 
     # alias network ip
-    print(dir(network))
-    os.system(f'ifconfig {network.LOOPBACK_NETWORK_NAME} alias {docker.NETWORK_GATEWAY}')
+    os.system(
+        f'ifconfig {network.LOOPBACK_NETWORK_NAME} alias {docker.NETWORK_GATEWAY}')
 
     # prepare tunnel
     port = False
