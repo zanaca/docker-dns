@@ -9,16 +9,20 @@ import network
 import tunnel
 
 
-def setup(tld=config.TOP_LEVEL_DOMAIN):
-    PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
+PWD = os.path.dirname(os.path.dirname(__file__))
+PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
+KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
+APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
 
+
+def setup(tld=config.TOP_LEVEL_DOMAIN):
     if not os.path.isdir('/etc/resolver'):
         os.mkdir('/etc/resolver')
     open('/etc/resolver/{config',
          'w').write(f'nameserver {docker.NETWORK_GATEWAY}')
 
     plist = open('src/templates/com.zanaca.dockerdns-tunnel.plist',
-                 'r').read().replace('{PWD}', os.path.dirname(__file__))
+                 'r').read().replace('{PWD}', PWD)
     open(PLIST_PATH, 'w').write(plist)
     os.system(f'sudo launchctl load -w {PLIST_PATH} 1>/dev/null 2>/dev/null')
 
@@ -30,9 +34,6 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
 
 
 def install(tld=config.TOP_LEVEL_DOMAIN):
-    KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
-    APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
-
     print('Generating known_hosts backup for user "root", if necessary')
     if not os.path.exists(f'{config.HOME_ROOT}/.ssh'):
         os.mkdir(f'{config.HOME_ROOT}/.ssh')
@@ -57,10 +58,10 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
 
     print('Adding key to known_hosts for user "root"')
 
-    shutil.copy2('templates/dockerdns-tunnel_app', APP_DESTINATION)
-    workflow = open(f'{APP_DESTINATION}/document.wflow', 'r').read()
+    shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
+    workflow = open(f'{APP_DESTINATION}/Contents/document.wflow', 'r').read()
     workflow = workflow.replace(
-        '[PATH]', os.path.dirname(os.path.dirname(__file__)))
-    open(f'{APP_DESTINATION}/document.wflow', 'w').write(workflow)
+        '[PATH]', PWD)
+    open(f'{APP_DESTINATION}/Contents/document.wflow', 'w').write(workflow)
 
     tunnel.connect(daemon=True)
