@@ -20,11 +20,10 @@ def connect(daemon=False, verbose=False):
 
     util.check_if_root()
     docker_container_name = config.DOCKER_CONTAINER_NAME
-    ip_address = docker.NETWORK_GATEWAY
-    network = docker.NETWORK_SUBNET
 
     # alias network ip
-    os.system(f'ifconfig {network.LOOPBACK_NETWORK} alias {ip_address}')
+    print(dir(network))
+    os.system(f'ifconfig {network.LOOPBACK_NETWORK_NAME} alias {docker.NETWORK_GATEWAY}')
 
     # prepare tunnel
     port = False
@@ -33,7 +32,7 @@ def connect(daemon=False, verbose=False):
         if '22/tcp' in ports:
             port = ports['22/tcp'][0]['HostPort']
     sys.argv = [shutil.which('sshuttle'), '--pidfile=/tmp/sshuttle.pid',
-                '-r', f'root@127.0.0.1:{port}', network]
+                '-r', f'root@127.0.0.1:{port}', docker.NETWORK_SUBNET]
     if verbose:
         sys.argv.append('-vv')
     if daemon:

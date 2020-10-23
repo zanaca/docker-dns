@@ -2,3 +2,4 @@ docker
 netifaces
 sshuttle
 pycryptodome
+pyOpenSSL

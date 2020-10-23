@@ -34,7 +34,7 @@ else:
     VERSION_MAJOR_ID = open(
         '/etc/os-release', 'r').read().split('VERSION_ID="')[1].split('.')[0]
     OS_VERSION = int(VERSION_MAJOR_ID)
-OS = f'{HOSTUNAME}_${NAME}'
+OS = f'{HOSTUNAME}_{NAME}'
 
 TOP_LEVEL_DOMAIN = (util.read_cache('tld') or 'docker').strip()
 DOCKER_CONTAINER_TAG = (util.read_cache('tag') or 'ns0').strip()
