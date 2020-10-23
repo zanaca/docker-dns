@@ -58,10 +58,14 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
 
     print('Adding key to known_hosts for user "root"')
 
-    shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
+    if not os.path.exists(APP_DESTINATION):
+        shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
     workflow = open(f'{APP_DESTINATION}/Contents/document.wflow', 'r').read()
     workflow = workflow.replace(
         '[PATH]', PWD)
     open(f'{APP_DESTINATION}/Contents/document.wflow', 'w').write(workflow)
 
     tunnel.connect(daemon=True)
+
+
+def install(tld=config.TOP_LEVEL_DOMAIN):
