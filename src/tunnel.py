@@ -38,9 +38,12 @@ def connect(daemon=False, verbose=False):
     if daemon:
         sys.argv.append('-D')
 
-    while True:
+    ok = False
+    while not ok:
         sshuttle_fake_caller()
         time.sleep(1)
+        if daemon:
+            ok = True
 
 
 def check_if_running():
