@@ -57,7 +57,12 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
             content_file.write(pubkey.exportKey('OpenSSH'))
 
     print('- Building...')
-    client.images.build(path='.', tag=f'{tag}:latest', nocache=False)
+    docker_output = client.images.build(
+        path='.', tag=f'{tag}:latest', nocache=False)
+
+    for line in docker_output[1]:
+        if 'stream' in line:
+            print(line['stream'], end='')
 
     port_53 = 53
     if util.on_linux:
@@ -71,17 +76,23 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
             53: port_53
         },
         publish_all_ports=True,
-        binds=['/var/run/docker.sock:/var/run/docker.sock'],
+        binds=['/var/run/docker.sock:/var/run/docker.sock',
+               '/etc/resolv.conf:/etc/resolv_host.conf'],
     )
 
-    client.api.create_container(tag,
-                                name=name,
-                                volumes=['/var/run/docker.sock'],
-                                environment=[
-                                    f'TOP_LEVEL_DOMAIN={tld}', f'HOSTNAME={config.HOSTNAME}', f'HOSTUNAME={config.HOSTUNAME}'],
-                                #ports=['53/udp', 53],
-                                host_config=host_config,
-                                detach=True
-                                )
-    print('- Running...')
+    docker_output = client.api.create_container(tag,
+                                                name=name,
+                                                volumes=['/var/run/docker.sock',
+                                                         '/etc/resolv_host.conf'],
+                                                environment=[
+                                                    f'TOP_LEVEL_DOMAIN={tld}', f'HOSTNAME={config.HOSTNAME}', f'HOSTUNAME={config.HOSTUNAME}'],
+                                                #ports=['53/udp', 53],
+                                                host_config=host_config,
+                                                detach=True
+                                                )
+    if len(docker_output['Warnings']) > 0:
+        for line in line['Warnings']:
+            print(line)
+
+    print('- Starting...')
     client.api.start(name)
