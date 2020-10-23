@@ -4,16 +4,16 @@ import shutil
 import os
 import sys
 from sshuttle.cmdline import main as sshuttle_fake_caller
-import netifaces
 
 import util
 import config
 import dockerapi as docker
+import network
 
 SIOCSIFADDR = 0x8916
 
 
-def connect():
+def connect(daemon=False, verbose=False):
     if not util.is_tunnel_needed():
         print("You do not need to run tunnel")
         sys.exit(0)
@@ -24,7 +24,7 @@ def connect():
     network = docker.NETWORK_SUBNET
 
     # alias network ip
-    os.system(f'ifconfig {netifaces.interfaces()[0]} alias {ip_address}')
+    os.system(f'ifconfig {network.LOOPBACK_NETWORK} alias {ip_address}')
 
     # prepare tunnel
     port = False
@@ -34,7 +34,10 @@ def connect():
             port = ports['22/tcp'][0]['HostPort']
     sys.argv = [shutil.which('sshuttle'), '--pidfile=/tmp/sshuttle.pid',
                 '-r', f'root@127.0.0.1:{port}', network]
-    # sys.argv.append('-vv') # uncomment for verbose
+    if verbose:
+        sys.argv.append('-vv')
+    if daemon:
+        sys.argv.append('-D')
 
     while True:
         sshuttle_fake_caller()

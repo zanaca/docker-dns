@@ -1,7 +1,11 @@
 import platform
 import socket
 import subprocess
+import netifaces
 
+
+
+LOOPBACK_NETWORK = netifaces.interfaces()[0]
 
 def is_valid_ipv4_address(address):
     try:
@@ -69,3 +73,4 @@ def get_dns_servers():
         dns_ips = []
 
     return dns_ips
+
