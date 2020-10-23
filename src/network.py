@@ -22,5 +22,4 @@ def is_valid_ipv4_address(address):
 
 
 def get_dns_servers():
-
     return dns.resolver.Resolver().nameservers
