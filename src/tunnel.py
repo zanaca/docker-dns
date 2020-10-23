@@ -1,12 +1,16 @@
 import time
 import socket
 import shutil
+import os
 import sys
 from sshuttle.cmdline import main as sshuttle_fake_caller
+import netifaces
 
 import util
 import config
 import dockerapi as docker
+
+SIOCSIFADDR = 0x8916
 
 
 def connect():
@@ -19,19 +23,18 @@ def connect():
     ip_address = docker.NETWORK_GATEWAY
     network = docker.NETWORK_SUBNET
 
-    # ETHERN = bytes(config.LOOPBACK, 'utf-8')
-    # bin_ip = socket.inet_aton(ip_address)
-    # ifreq = struct.pack('16sH2s4s8s', ETHERN, socket.AF_INET,
-    #                     b'\x00' * 2, bin_ip, b'\x00' * 8)
-    # fcntl.ioctl(sock, SIOCSIFADDR, ifreq)
+    # alias network ip
+    os.system(f'ifconfig {netifaces.interfaces()[0]} alias {ip_address}')
 
+    # prepare tunnel
     port = False
     while not port:
         ports = docker.get_exposed_port(docker_container_name)
         if '22/tcp' in ports:
             port = ports['22/tcp'][0]['HostPort']
-    sys.argv = [shutil.which('sshuttle'), '-vv', '--pidfile=/tmp/sshuttle.pid',
+    sys.argv = [shutil.which('sshuttle'), '--pidfile=/tmp/sshuttle.pid',
                 '-r', f'root@127.0.0.1:{port}', network]
+    # sys.argv.append('-vv') # uncomment for verbose
 
     while True:
         sshuttle_fake_caller()

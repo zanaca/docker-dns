@@ -74,10 +74,14 @@ if __name__ == '__main__':
 
         elif opt.COMMAND == 'install':
             install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
+            status.main()
+
         elif opt.COMMAND == 'uninstall':
             uninstall.main()
+
         elif opt.COMMAND == 'tunnel':
             tunnel.connect()
+
         else:
             status.main()
 

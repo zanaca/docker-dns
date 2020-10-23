@@ -6,7 +6,7 @@
     <string>com.zanaca.dockerdns-tunnel</string>
     <key>ProgramArguments</key>
     <array>
-      <string>{PWD}/docker-dns tunnel</string>
+      <string>{PWD}/__main__.py tunnel</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

@@ -13,12 +13,13 @@ client = docker.from_env()
 
 NETWORK_GATEWAY = client.networks.get(
     'bridge').attrs['IPAM']['Config'][0]['Gateway']
-NETWORK_NETMASK = client.networks.get(
+NETWORK_SUBNET = client.networks.get(
     'bridge').attrs['IPAM']['Config'][0]['Subnet']
 
 
 def get_top_level_domain(container, tld):
-    return client.containers.get(config.DOCKER_CONTAINER_NAME).exec_run(f'sh -c "echo {config.TOP_LEVEL_DOMAIN}"').output.strip().decode("utf-8")
+    return client.containers.get(
+        config.DOCKER_CONTAINER_NAME).exec_run(f'sh -c "echo {config.TOP_LEVEL_DOMAIN}"').output.strip().decode("utf-8")
 
 
 def check_exists(name=config.DOCKER_CONTAINER_NAME):
@@ -36,12 +37,12 @@ def purge(name=config.DOCKER_CONTAINER_NAME):
     client.api.remove_container(name)
 
 
-def get_exposed_port(container):
-    return client.containers.get(config.DOCKER_CONTAINER_NAME).ports
+def get_exposed_port(name=config.DOCKER_CONTAINER_NAME):
+    return client.containers.get(name).ports
 
 
-# def get_ip(container):
-#     return client.containers.get(config.DOCKER_CONTAINER_NAME).attrs['NetworkSettings']['IPAddress']
+def get_ip(name=config.DOCKER_CONTAINER_NAME):
+    return client.containers.get(name).attrs['NetworkSettings']['IPAddress']
 
 
 def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
