@@ -8,8 +8,8 @@ import util
 APP = os.path.basename(sys.argv[0])
 
 WHO = os.environ["USER"]
-HOME = os.environ["HOME"]
-HOME_ROOT = '/root'
+HOME = os.path.expanduser("~")
+HOME_ROOT = os.path.expanduser("~root")
 PWD = os.getcwd
 HOSTNAME = socket.gethostname()
 HOSTUNAME = platform.uname().system
