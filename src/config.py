@@ -20,7 +20,7 @@ elif util.on_wsl:
     NAME = 'wsl2'
 else:
     NAME = open('/etc/os-release',
-                'r').read().split('NAME="')[1].split('.')[0]
+                'r').read().split('NAME="')[1].split('"')[0]
 
 if util.on_macos:
     VERSION_MAJOR_ID = '.'.join(platform.mac_ver()[0].split('.')[0:2])
