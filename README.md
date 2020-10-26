@@ -38,7 +38,7 @@ For an simple installation process, paste the command in a macOS Terminal, Linux
 
 `$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
 
--   The script will place docker-dns inside `/usr/local/src/docker-dns`
+-   The script will place docker-dns inside `/usr/local/docker-dns`
 
 Or if you preffer, you can simple checkout the code in any folder of your choice and:
 
