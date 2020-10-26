@@ -3,7 +3,8 @@
 cat <<EOF  > /root/dnsmasq-restart.sh
 #!/bin/sh
 killall dnsmasq
-/usr/sbin/dnsmasq "$@"
+sleep 1
+/usr/sbin/dnsmasq "\$@"
 EOF
 chmod +x /root/dnsmasq-restart.sh
 
