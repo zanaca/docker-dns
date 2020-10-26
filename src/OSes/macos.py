@@ -55,8 +55,8 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
         uid = os.getuid()
         gid = os.getgid()
         if 'SUDO_UID' in os.environ:
-            uid = os.environ.get('SUDO_UID')
-            gid = os.environ.get('SUDO_GID')
+            uid = int(os.environ.get('SUDO_UID'))
+            gid = int(os.environ.get('SUDO_GID'))
         shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
         util.change_owner_recursive(APP_DESTINATION, uid, gid)
     workflow = open(f'{APP_DESTINATION}/Contents/document.wflow', 'r').read()
@@ -82,7 +82,13 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
 
     if os.path.exists(APP_DESTINATION):
         print('Removing tunnel app')
-        try:
-            util.remove_dir(APP_DESTINATION)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (APP_DESTINATION, e))
+        for filename in os.listdir(APP_DESTINATION):
+            file_path = os.path.join(APP_DESTINATION, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        os.unlink(APP_DESTINATION)
