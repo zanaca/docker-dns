@@ -1,0 +1,8 @@
+- darwin:
+    min: 10.15
+
+- windows:
+    min: 10.wsl2
+
+- ubuntu:
+    min: 18

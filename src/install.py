@@ -11,16 +11,16 @@ import network
 import tunnel
 
 if util.on_macos:
-    import OSes.darwin as OS
+    import OSes.macos as OS
 
 elif util.on_wsl:
     import OSes.wsl as OS
 
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
-        import OSes.debian as OS
+        import OSes.ubuntu as OS
     else:
-        import OSes.redhat as OS
+        import OSes.debian as OS
 
 RESOLVCONF = '/etc/resolv.conf'
 

@@ -1,1 +1,0 @@
-Linux_Fedora27.mk
