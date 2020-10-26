@@ -78,3 +78,29 @@ def generate_certificate(
 
 def check_if_installed():
     return os.path.exists('.cache/INSTALLED')
+
+
+def remove_dir(path, mode):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for dir in [os.path.join(root, d) for d in dirs]:
+            os.chmod(dir, mode)
+    for file in [os.path.join(root, f) for f in files]:
+        os.chmod(file, mode)
+
+
+def change_permissions_recursive(path, mode):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for dir in [os.path.join(root, d) for d in dirs]:
+            os.chmod(dir, mode)
+    for file in [os.path.join(root, f) for f in files]:
+        os.chmod(file, mode)
+
+
+def change_owner_recursive(path, uid, gid=None):
+    if not gid:
+        gid = uid
+    for root, dirs, files in os.walk(path, topdown=False):
+        for dir in [os.path.join(root, d) for d in dirs]:
+            os.chown(dir, uid, gid)
+    for file in [os.path.join(root, f) for f in files]:
+        os.chown(file, uid, gid)
