@@ -25,12 +25,12 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
          'w').write(f'nameserver 127.0.0.1')
 
     #ini = ''
-    #if os.path.exists(WSL_CONF):
+    # if os.path.exists(WSL_CONF):
     #    ini = open(WSL_CONF, 'r').read()
 
-    #if '[network]' not in ini:
+    # if '[network]' not in ini:
     #    ini += "\n[network]\ngenerateResolvConf = false\n"
-    #else:
+    # else:
     #    if 'generateResolvConf' not in ini:
     #        ini = ini.replace('[network]', "[network]\ngenerateResolvConf = false\n")
     #    else:
@@ -65,7 +65,8 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     if not port:
         raise('Problem fetching ssh port')
 
-    os.system(f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
+    os.system(
+        f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
 
     return True
 
@@ -76,7 +77,8 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         os.unlink(f'/etc/resolver/{tld}')
 
     ini = open(WSL_CONF, 'r').read()
-    ini = ini.replace('ngenerateResolvConf = false', 'ngenerateResolvConf = true')
+    ini = ini.replace('ngenerateResolvConf = false',
+                      'ngenerateResolvConf = true')
     open(WSL_CONF, 'w').write(ini)
 
     if os.path.exists(DNSMASQ_LOCAL_CONF):
@@ -85,4 +87,3 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
     if os.path.exists(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns'):
         print('Removing kwown_hosts backup')
         os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
-

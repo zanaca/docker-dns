@@ -8,6 +8,7 @@ on_windows = platform.uname().system.lower() == 'windows'
 on_linux = platform.uname().system.lower() == 'linux'
 on_wsl = on_linux and "microsoft" in platform.uname().release.lower()
 
+
 def is_supported():
     return not on_windows
 
@@ -43,11 +44,12 @@ def write_cache(item, value):
 def is_super_user():
     return os.geteuid() == 0
 
+
 def generate_certificate(
-    tld = None,
-    cert_file = '/dev/null',
-    key_file = '/dev/null'
-    ):
+    tld=None,
+    cert_file='/dev/null',
+    key_file='/dev/null'
+):
     if not tld:
         raise('No top level domain informed')
 
@@ -68,7 +70,8 @@ def generate_certificate(
     cert.set_pubkey(k)
     cert.sign(k, 'sha512')
     with open(cert_file, "wt") as f:
-        f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode("utf-8"))
+        f.write(crypto.dump_certificate(
+            crypto.FILETYPE_PEM, cert).decode("utf-8"))
     with open(key_file, "wt") as f:
         f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode("utf-8"))
 

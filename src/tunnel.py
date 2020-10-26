@@ -19,7 +19,7 @@ def connect(verbose=False):
         sys.exit(0)
 
     if not util.is_super_user():
-         exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+        exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
 
     docker_container_name = config.DOCKER_CONTAINER_NAME
 
@@ -39,9 +39,9 @@ def connect(verbose=False):
         sys.argv.append('-vv')
 
     sys.argv += ['--pidfile=/tmp/sshuttle.pid',
-                '-r', f'root@127.0.0.1:{port}', docker.NETWORK_SUBNET]
+                 '-r', f'root@127.0.0.1:{port}', docker.NETWORK_SUBNET]
     #           '-r', f'root@127.0.0.1:{port}', '-x', '10.0.0.0/8', '-x', '192.168.0.0/16', '0/0']
-    #while True:
+    # while True:
     sshuttle_fake_caller()
     #    time.sleep(1)
 

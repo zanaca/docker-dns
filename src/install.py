@@ -73,7 +73,8 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
 
     print(
         f'Building and running container "{tag}:latest"... Please wait')
-    docker.build_container(name, tag, tld)
+    docker.build_container(
+        name, tag, tld, bind_port_ip=util.on_linux and not util.on_wsl)
     update_cache()
 
     # dnsmasq
@@ -102,4 +103,3 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         os.system(' '.join(original_arg))
 
     open('.cache/INSTALLED', 'w').write('')
-

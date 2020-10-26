@@ -15,7 +15,6 @@ import install
 import uninstall
 
 
-
 parser = ArgumentParser(
     prog=config.APP,
     usage="%(prog)s COMMAND [-t tag] [-n name] [-d tld] -h",
@@ -56,6 +55,7 @@ parser.add_argument(
     """
 )
 
+
 def super_check():
     if not util.is_super_user():
         print("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
@@ -73,26 +73,21 @@ def run():
 
     try:
         if opt.COMMAND == 'show-domain':
-            import show_domain
             show_domain.main()
 
         elif opt.COMMAND == 'install':
             super_check()
-            import install
             install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
 
         elif opt.COMMAND == 'uninstall':
             super_check()
-            import uninstall
             uninstall.main()
 
         elif opt.COMMAND == 'tunnel':
             super_check()
-            import tunnel
             tunnel.connect()
 
         else:
-            import status
             status.main()
         return 0
 
@@ -102,6 +97,7 @@ def run():
     except KeyboardInterrupt:
         print('Keyboard interrupt: exiting.')
         return 1
+
 
 if __name__ == '__main__':
     sys.exit(run())
