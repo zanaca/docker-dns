@@ -8,7 +8,8 @@ import util
 import network
 
 
-PWD = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+PWD = os.path.abspath(os.path.dirname(
+    os.path.dirname(os.path.dirname(__file__))))
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
@@ -51,8 +52,13 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
         f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
 
     if not os.path.exists(APP_DESTINATION):
+        uid = os.getuid()
+        gid = os.getgid()
+        if 'SUDO_UID' in os.environ:
+            uid = os.environ.get('SUDO_UID')
+            gid = os.environ.get('SUDO_GID')
         shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
-        os.chown()
+        util.change_owner_recursive(APP_DESTINATION, uid, gid)
     workflow = open(f'{APP_DESTINATION}/Contents/document.wflow', 'r').read()
     workflow = workflow.replace(
         '[PATH]', PWD)
@@ -76,12 +82,7 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
 
     if os.path.exists(APP_DESTINATION):
         print('Removing tunnel app')
-        for filename in os.listdir(APP_DESTINATION):
-            file_path = os.path.join(APP_DESTINATION, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        try:
+            util.remove_dir(APP_DESTINATION)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (APP_DESTINATION, e))
