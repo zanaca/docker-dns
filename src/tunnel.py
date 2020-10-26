@@ -15,7 +15,7 @@ SIOCSIFADDR = 0x8916
 
 def connect(verbose=False):
     if not util.is_tunnel_needed():
-        print("You do not need to run tunnel")
+        print("You do not need to create a tunnel")
         sys.exit(0)
 
     if not util.is_super_user():
