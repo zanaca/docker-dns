@@ -2,6 +2,8 @@ import socket
 import netifaces
 import dns.resolver
 
+import config
+
 
 LOOPBACK_NETWORK_NAME = netifaces.interfaces()[0]
 
@@ -23,3 +25,10 @@ def is_valid_ipv4_address(address):
 
 def get_dns_servers():
     return dns.resolver.Resolver().nameservers
+
+
+def is_resolving_tld(tld = config.TOP_LEVEL_DOMAIN):
+    try:
+        return socket.gethostbyname_ex(tld)
+    except:
+        return False

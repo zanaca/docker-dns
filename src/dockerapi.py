@@ -5,7 +5,7 @@ import docker
 import util
 import config
 
-Errors = docker.errors
+errors = docker.errors
 
 RSA_KEY = 'Dockerfile_id_rsa'
 
@@ -22,9 +22,9 @@ else:
     NETWORK_GATEWAY[3] = '1'
     NETWORK_GATEWAY = '.'.join(NETWORK_GATEWAY)
 
-
-def get_top_level_domain(name=config.DOCKER_CONTAINER_NAME, tld=config.TOP_LEVEL_DOMAIN):
-    return client.containers.get(name).exec_run(f'sh -c "echo {tld}"').output.strip().decode("utf-8")
+def get_top_level_domain(container, tld):
+    return client.containers.get(
+        config.DOCKER_CONTAINER_NAME).exec_run(f'sh -c "echo {config.TOP_LEVEL_DOMAIN}"').output.strip().decode("utf-8")
 
 
 def check_exists(name=config.DOCKER_CONTAINER_NAME):
@@ -62,8 +62,12 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
             content_file.write(pubkey.exportKey('OpenSSH'))
 
     print('- Building...')
+    target = 'base_oses'
+    #if util.on_wsl or util.on_windows:
+    #    target = 'windows'
+
     docker_output = client.images.build(
-        path='.', tag=f'{tag}:latest', nocache=False)
+        path='.', target=target, tag=f'{tag}:latest', nocache=False)
 
     for line in docker_output[1]:
         if 'stream' in line:
@@ -81,14 +85,12 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
             53: port_53
         },
         publish_all_ports=True,
-        binds=['/var/run/docker.sock:/var/run/docker.sock',
-               '/etc/resolv.conf:/etc/resolv_host.conf'],
+        binds=['/var/run/docker.sock:/var/run/docker.sock'],
     )
 
     docker_output = client.api.create_container(tag,
                                                 name=name,
-                                                volumes=['/var/run/docker.sock',
-                                                         '/etc/resolv_host.conf'],
+                                                volumes=['/var/run/docker.sock'],
                                                 environment=[
                                                     f'TOP_LEVEL_DOMAIN={tld}', f'HOSTNAME={config.HOSTNAME}', f'HOSTUNAME={config.HOSTUNAME}'],
                                                 #ports=['53/udp', 53],
@@ -101,3 +103,10 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
 
     print('- Starting...')
     client.api.start(name)
+
+
+def check_if_tunnel_is_connected(name=config.DOCKER_CONTAINER_NAME):
+    output = client.containers.get(
+        config.DOCKER_CONTAINER_NAME).exec_run('ps').output.strip().decode("utf-8").split("python3")
+
+    return len(output) > 1

@@ -4,10 +4,9 @@ from OpenSSL import crypto, SSL
 
 
 on_macos = platform.uname().system.lower() == 'darwin'
-on_windows = platform.uname().system.lower() == 'microsoft'
+on_windows = platform.uname().system.lower() == 'windows'
 on_linux = platform.uname().system.lower() == 'linux'
-on_wsl = "microsoft" in platform.uname().release.lower()
-
+on_wsl = on_linux and "microsoft" in platform.uname().release.lower()
 
 def is_supported():
     return not on_windows
@@ -41,7 +40,7 @@ def write_cache(item, value):
     return open(f'.cache/{item}', 'w').write(value)
 
 
-def check_if_root():
+def is_super_user():
     return os.geteuid() == 0
 
 def generate_certificate(
@@ -72,3 +71,7 @@ def generate_certificate(
         f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode("utf-8"))
     with open(key_file, "wt") as f:
         f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode("utf-8"))
+
+
+def check_if_installed():
+    return os.path.exists('.cache/INSTALLED')

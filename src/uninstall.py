@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+import sys
 
 import config
 import dockerapi as docker
@@ -10,10 +11,10 @@ import util
 if util.on_macos:
     import OSes.darwin as OS
 
-if util.on_wsl:
-    import OSes.debian as OS
+elif util.on_wsl:
+    import OSes.wsl as OS
 
-if util.on_linux:
+elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.debian as OS
     else:
@@ -21,7 +22,7 @@ if util.on_linux:
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
-    if not install.check_if_installed():
+    if not util.check_if_installed():
         print('No installation found')
         sys.exit(1)
 

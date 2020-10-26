@@ -2,19 +2,21 @@ import os
 import time
 import shutil
 import json
+import sys
 
 import config
 import dockerapi as docker
 import util
 import network
+import tunnel
 
 if util.on_macos:
     import OSes.darwin as OS
 
-if util.on_wsl:
-    import OSes.debian as OS
+elif util.on_wsl:
+    import OSes.wsl as OS
 
-if util.on_linux:
+elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.debian as OS
     else:
@@ -82,9 +84,12 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     shutil.copy2(cert_file, OS.DOCKER_CONF_FOLDER)
     shutil.copy2(key_file, OS.DOCKER_CONF_FOLDER)
 
-    OS.install(tld)
+    original_arg = sys.argv
+    install_status = OS.install(tld)
+    if install_status and util.is_tunnel_needed():
+        original_arg[1] = 'tunnel'
+        original_arg.append('&')
+        os.system(' '.join(original_arg))
+
     open('.cache/INSTALLED', 'w').write('')
 
-
-def check_if_installed():
-    return os.path.exists('.cache/INSTALLED')

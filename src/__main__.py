@@ -6,6 +6,8 @@ from argparse import ArgumentParser, Action, ArgumentTypeError as Fatal
 
 import config
 import util
+
+# COMMANDS
 import tunnel
 import show_domain
 import status
@@ -24,6 +26,7 @@ parser.add_argument(
     "COMMAND",
     choices=["install", "uninstall", "show-domain", "status", "tunnel"],
     default='status',
+    # required=True,
     help="""
     command to be executed
     """
@@ -53,8 +56,8 @@ parser.add_argument(
     """
 )
 
-def root_check():
-    if not util.check_if_root():
+def super_check():
+    if not util.is_super_user():
         print("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
         sys.exit(1)
 
@@ -62,31 +65,34 @@ def root_check():
 def run():
     if not util.is_supported():
         print('Sorry, your OS is not supported.')
+        if util.on_windows and not util.on_wsl:
+            print('Please make sure you are running on a WSL2 shell.')
         return 1
 
     opt = parser.parse_args()
 
     try:
         if opt.COMMAND == 'show-domain':
+            import show_domain
             show_domain.main()
 
         elif opt.COMMAND == 'install':
-            root_check()
-            status = install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
-            if status == 0:
-                status.main()
-                return 0
-            return 1
+            super_check()
+            import install
+            install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
 
         elif opt.COMMAND == 'uninstall':
-            root_check()
+            super_check()
+            import uninstall
             uninstall.main()
 
         elif opt.COMMAND == 'tunnel':
-            root_check()
+            super_check()
+            import tunnel
             tunnel.connect()
 
         else:
+            import status
             status.main()
         return 0
 

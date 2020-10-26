@@ -7,7 +7,8 @@ import util
 
 APP = os.path.basename(sys.argv[0])
 
-WHO = os.environ["USER"]
+
+WHO = os.environ["USERNAME"] if 'USERNAME' in os.environ else os.environ ['USER']
 HOME = os.path.expanduser("~")
 HOME_ROOT = os.path.expanduser("~root")
 PWD = os.getcwd
@@ -16,8 +17,8 @@ HOSTUNAME = platform.uname().system
 
 if util.on_macos or util.on_windows:
     NAME = platform.uname()[0]
-elif util.on_wsl:
-    NAME = 'wsl2'
+# elif util.on_wsl:
+#    NAME = 'wsl2'
 else:
     NAME = open('/etc/os-release',
                 'r').read().split('NAME="')[1].split('"')[0]
