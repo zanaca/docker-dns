@@ -1,6 +1,7 @@
 import platform
 import os
 from OpenSSL import crypto, SSL
+import shutil
 
 
 on_macos = platform.uname().system.lower() == 'darwin'
