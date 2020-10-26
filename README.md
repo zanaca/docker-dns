@@ -22,7 +22,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 -   Docker 19.03.13
 -   Ubuntu: 20.04
 -   macOS: Catalina
--   Windows 10, with WSL2
+-   Windows: 10
 
 You can see a list of older OSes on version [1.x](/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
 
@@ -30,7 +30,7 @@ On Windows you don't have to install Docker from WSL2 linux, you should work wit
 
 #### \* Windows reminder
 
-At that stage you wil accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example, **but not** from your browser. A solution is being designed for and it is working on tests right now.
+At that stage you wil accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example, **but not** from your browser. A solution is being designed and it is working on tests.
 
 ## Install
 
