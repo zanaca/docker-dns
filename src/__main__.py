@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-#import socket
-#import struct
-#import fcntl
 import sys
 import os
 from argparse import ArgumentParser, Action, ArgumentTypeError as Fatal
@@ -15,8 +12,6 @@ import status
 import install
 import uninstall
 
-#SIOCSIFADDR = 0x8916
-#sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 parser = ArgumentParser(
@@ -25,12 +20,10 @@ parser = ArgumentParser(
     fromfile_prefix_chars="@"
 )
 
-
 parser.add_argument(
     "COMMAND",
     choices=["install", "uninstall", "show-domain", "status", "tunnel"],
     default='status',
-    # required=True,
     help="""
     command to be executed
     """
@@ -60,10 +53,16 @@ parser.add_argument(
     """
 )
 
-if __name__ == '__main__':
+def root_check():
+    if not util.check_if_root():
+        print("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+        sys.exit(1)
+
+
+def run():
     if not util.is_supported():
         print('Sorry, your OS is not supported.')
-        sys.exit(1)
+        return 1
 
     opt = parser.parse_args()
 
@@ -72,21 +71,31 @@ if __name__ == '__main__':
             show_domain.main()
 
         elif opt.COMMAND == 'install':
-            install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
-            status.main()
+            root_check()
+            status = install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
+            if status == 0:
+                status.main()
+                return 0
+            return 1
 
         elif opt.COMMAND == 'uninstall':
+            root_check()
             uninstall.main()
 
         elif opt.COMMAND == 'tunnel':
+            root_check()
             tunnel.connect()
 
         else:
             status.main()
+        return 0
 
     except Fatal as e:
         print(f'fatal: {e}')
-        sys.exit(1)
+        return 1
     except KeyboardInterrupt:
         print('Keyboard interrupt: exiting.')
-        sys.exit(0)
+        return 1
+
+if __name__ == '__main__':
+    sys.exit(run())

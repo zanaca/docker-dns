@@ -42,8 +42,7 @@ def write_cache(item, value):
 
 
 def check_if_root():
-    if os.geteuid() != 0:
-        exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+    return os.geteuid() == 0
 
 def generate_certificate(
     tld = None,

@@ -1,1 +1,9 @@
-src/__main__.py
+#!/usr/bin/env python3
+
+import sys
+sys.path.append('./src')
+
+import src.__main__ as docker_dns
+
+if __name__ == '__main__':
+    sys.exit(docker_dns.run())

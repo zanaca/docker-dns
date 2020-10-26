@@ -16,9 +16,7 @@ SIOCSIFADDR = 0x8916
 def connect(daemon=False, verbose=False):
     if not util.is_tunnel_needed():
         print("You do not need to run tunnel")
-        sys.exit(0)
-
-    util.check_if_root()
+        return 0
     docker_container_name = config.DOCKER_CONTAINER_NAME
 
     # alias network ip
@@ -58,6 +56,9 @@ def check_if_running():
             ('127.0.0.1', port))
         s.close()
         return code == 0
+
+    except docker.Errors.NotFound as e:
+        return False
 
     except Exception as e:
         print(f'Error: {e}')

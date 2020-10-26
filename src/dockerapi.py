@@ -5,21 +5,26 @@ import docker
 import util
 import config
 
+Errors = docker.errors
 
 RSA_KEY = 'Dockerfile_id_rsa'
 
 client = docker.from_env()
 
+__network_config = client.networks.get(
+    'bridge').attrs['IPAM']['Config'][0]
+NETWORK_SUBNET = __network_config['Subnet']
+NETWORK_GATEWAY = None
+if 'Gateway' in __network_config:
+    NETWORK_GATEWAY = __network_config['Gateway']
+else:
+    NETWORK_GATEWAY = NETWORK_SUBNET.split('.')
+    NETWORK_GATEWAY[3] = '1'
+    NETWORK_GATEWAY = '.'.join(NETWORK_GATEWAY)
 
-NETWORK_GATEWAY = client.networks.get(
-    'bridge').attrs['IPAM']['Config'][0]['Gateway']
-NETWORK_SUBNET = client.networks.get(
-    'bridge').attrs['IPAM']['Config'][0]['Subnet']
 
-
-def get_top_level_domain(container, tld):
-    return client.containers.get(
-        config.DOCKER_CONTAINER_NAME).exec_run(f'sh -c "echo {config.TOP_LEVEL_DOMAIN}"').output.strip().decode("utf-8")
+def get_top_level_domain(name=config.DOCKER_CONTAINER_NAME, tld=config.TOP_LEVEL_DOMAIN):
+    return client.containers.get(name).exec_run(f'sh -c "echo {tld}"').output.strip().decode("utf-8")
 
 
 def check_exists(name=config.DOCKER_CONTAINER_NAME):
