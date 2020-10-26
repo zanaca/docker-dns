@@ -1,8 +1,0 @@
-strict-order
-bind-interfaces
-interface=${LOOPBACK}
-interface=docker0
-
-server=/${TLD}/${IP}
-address=/${HOSTNAME}.${TLD}/${IP}
-address=/.${HOSTNAME}.${TLD}/${IP}
