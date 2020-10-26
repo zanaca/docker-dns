@@ -103,3 +103,4 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         os.system(' '.join(original_arg))
 
     open('.cache/INSTALLED', 'w').write('')
+    return True

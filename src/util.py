@@ -93,6 +93,7 @@ def remove_dir(base_path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
+    os.rmdir(base_path)
 
 
 def change_permissions_recursive(path, mode):
