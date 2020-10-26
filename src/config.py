@@ -8,7 +8,6 @@ import util
 APP = os.path.basename(sys.argv[0])
 
 
-WHO = os.environ["USERNAME"] if 'USERNAME' in os.environ else os.environ['USER']
 HOME = os.path.expanduser("~")
 HOME_ROOT = os.path.expanduser("~root")
 PWD = os.getcwd
