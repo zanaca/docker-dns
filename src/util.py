@@ -82,7 +82,9 @@ def check_if_installed():
 
 
 def remove_dir(base_path):
-    for filename in base_path:
+    for filename in os.listdir(base_path):
+        if filename in ['.', '..']:
+            continue
         file_path = os.path.join(base_path, filename)
         try:
             if os.path.isfile(file_path) or os.path.islink(file_path):
