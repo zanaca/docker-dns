@@ -6,6 +6,7 @@ tld ?= $(shell test -f .cache/tld && cat .cache/tld || echo 'docker')
 name ?= $(shell test -f .cache/name && cat .cache/name || echo '${tag}')
 
 install: warning
+	@sudo -H pip3 install -r requirements.txt
 	@./src/__main__.py install -t "$(tag)" -d "$(tld)" -n "$(name)" 
 
 uninstall: warning

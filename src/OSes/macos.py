@@ -14,6 +14,7 @@ KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
 DOCKER_CONF_FOLDER = f'{config.HOME}/Library/Containers/com.docker.docker/Data/database/com.docker.driver.amd64-linux/etc/docker'
 
+
 def setup(tld=config.TOP_LEVEL_DOMAIN):
     if not os.path.isdir('/etc/resolver'):
         os.mkdir('/etc/resolver')
@@ -46,7 +47,8 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     if not port:
         raise('Problem fetching ssh port')
 
-    os.system(f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
+    os.system(
+        f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
 
     if not os.path.exists(APP_DESTINATION):
         shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)

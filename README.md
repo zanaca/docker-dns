@@ -10,7 +10,42 @@ The main usage is for development environment only, should not be used in produc
 
 By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNAME.docker_.
 
-### Supported commands
+## Requirements
+
+-   [Docker](https://www.docker.com/products/docker-desktop)
+-   Python3
+-   pip
+-   WSL2, on Windows
+
+## Tested enviroment
+
+-   Docker 19.03.13
+-   Ubuntu: 20.04
+-   macOS: Catalina
+-   Windows: 10
+
+You can see a list of older OSes on version [1.x](/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
+
+On Windows you don't have to install Docker from WSL2 linux, you should work with Docker for windows and enable WSL2 integration.
+
+#### \* Windows reminder
+
+At that stage you wil accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example, **but not** from your browser. A solution is being designed and it is working on tests.
+
+## Install
+
+For an simple installation process, paste the command in a macOS Terminal, Linux or WSL shell prompt.
+
+`$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
+
+-   The script will place docker-dns inside `/usr/local/docker-dns`
+
+Or if you preffer, you can simple checkout the code in any folder of your choice and:
+
+-   Install all python dependencies by running `pip3 install -r requirements.txt`
+-   Execute ./docker-dns install
+
+## Supported commands
 
 -   `install` - Set up all environment;
 
@@ -24,46 +59,28 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 
 You can see the list of all available commands and options running `./docker-dns -h`
 
-### Options
+## Options
 
-On `install` you can pass some variables to change how setup is done. You can change the working domain for example.
+On `install` command you can pass some variables to change how setup is done. You can change the working domain for example.
 
 -   _tld_: working domain. It can be any domain name but the domains designed to work in loopback network. For example `yourmachine.dev` will create names like `CONTAINER_NAME.yourmachine.dev`. You can have `docker.your_real_domain.com` as well so it will create names like `CONTAINER_NAME.docker.your_real_domain.com . Default value: `docker`;
 
--   _tag_: Tag name for the created docker image. It should be changed only if you have a name conflict Default value: `ns0`
+-   _tag_: Tag name for the created docker image. It should be changed only if you have a name conflict Default value: `ns0`;
 
--   _name_: Running container name. Default value: the _tag_ name
+-   _name_: Running container name. Default value: the _tag_ value.
 
 Example:
 `./docker-dns install tld=docker.dev tag=dns`
 Will create a docker image name _dns_ and it will be available as _dns.docker.dev_ so you could run `dig www.google.com @dns.docker.dev`
 
-### Requirements
+## Troubleshooting
 
--   [Docker CE](https://www.docker.com) or [Docker for mac](https://www.docker.com/docker-mac)
--   Python3
--   pip
+If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./docker-dns tunnel` from docker-dns folder
 
-Make sure you have installed all python dependencies by running `pip3 install -r requirements.txt`
-
-### Tested enviroment
-
--   Docker 19.03.13
--   Docker for mac 19.03.13
--   Ubuntu: 20.04
--   Fedora: 27
--   macOS: Catalina
-
-You can see a list of older OSes on version [1.x](/zanaca/docker-dns/blob/release/1.x/README.md#tested-enviroment)
-
-### Troubleshooting
-
-If you are using macOS, on restart, you will loose access to your containers. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./docker-dns tunnel` from docker-dns folder
-
-### License
+## License
 
 [MIT](LICENSE.md)
 
-### Thanks
+## Thanks
 
--   Thanks to https://github.com/apenwarr/sshuttle for the great poor's man VPN service! An easy way to setup tunneling on macOS
+-   Thanks to https://github.com/apenwarr/sshuttle for the great poor's man VPN service! An easy way to setup tunneling on macOS and Windows WSL

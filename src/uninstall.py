@@ -17,7 +17,7 @@ elif util.on_wsl:
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.ubuntu as OS
-    #else:
+    # else:
     #    import OSes.debian as OS
 
 

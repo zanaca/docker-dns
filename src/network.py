@@ -27,7 +27,7 @@ def get_dns_servers():
     return dns.resolver.Resolver().nameservers
 
 
-def is_resolving_tld(tld = config.TOP_LEVEL_DOMAIN):
+def is_resolving_tld(tld=config.TOP_LEVEL_DOMAIN):
     try:
         return socket.gethostbyname_ex(tld)
     except:

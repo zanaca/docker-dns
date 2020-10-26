@@ -29,8 +29,8 @@ FROM alpine:latest AS base_oses
         ssh-keygen -A
 
     RUN passwd -d root
-    RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf
-    RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
+    RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf; \
+        echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
 
 FROM base_oses AS windows
     EXPOSE 1194/udp
