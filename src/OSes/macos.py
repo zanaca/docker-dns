@@ -8,7 +8,7 @@ import util
 import network
 
 
-PWD = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+PWD = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
@@ -22,7 +22,7 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
          'w').write(f'nameserver {docker.NETWORK_GATEWAY}')
 
     plist = open('src/templates/com.zanaca.dockerdns-tunnel.plist',
-                 'r').read().replace('{PWD}', config.PWD)
+                 'r').read().replace('{PWD}', PWD)
     open(PLIST_PATH, 'w').write(plist)
     os.system(f'sudo launchctl load -w {PLIST_PATH} 1>/dev/null 2>/dev/null')
 
@@ -52,9 +52,10 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
 
     if not os.path.exists(APP_DESTINATION):
         shutil.copytree('src/templates/dockerdns-tunnel_app', APP_DESTINATION)
+        os.chown()
     workflow = open(f'{APP_DESTINATION}/Contents/document.wflow', 'r').read()
     workflow = workflow.replace(
-        '[PATH]', config.PWD)
+        '[PATH]', PWD)
     open(f'{APP_DESTINATION}/Contents/document.wflow', 'w').write(workflow)
 
     return True
