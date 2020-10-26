@@ -80,12 +80,16 @@ def check_if_installed():
     return os.path.exists('.cache/INSTALLED')
 
 
-def remove_dir(path, mode):
-    for root, dirs, files in os.walk(path, topdown=False):
-        for dir in [os.path.join(root, d) for d in dirs]:
-            os.chmod(dir, mode)
-    for file in [os.path.join(root, f) for f in files]:
-        os.chmod(file, mode)
+def remove_dir(base_path):
+    for filename in base_path:
+        file_path = os.path.join(base_path, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
 def change_permissions_recursive(path, mode):
