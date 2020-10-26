@@ -12,6 +12,7 @@ DOCKER_CONF_FOLDER = '/etc/docker'
 DNSMASQ_LOCAL_CONF = '/etc/NetworkManager/dnsmasq.d/01_docker'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 WSL_CONF = '/etc/wsl.conf'
+DNS = '127.0.0.1'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
     DNSMASQ_LOCAL_CONF = DNSMASQ_LOCAL_CONF.replace('dnsmasq.d', 'conf.d')
@@ -23,27 +24,25 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
     open(f'/etc/resolver/{tld}',
          'w').write(f'nameserver 127.0.0.1')
 
-    ini = ''
-    if os.path.exists(WSL_CONF):
-        ini = open(WSL_CONF, 'r').read()
+    #ini = ''
+    #if os.path.exists(WSL_CONF):
+    #    ini = open(WSL_CONF, 'r').read()
 
-    if '[network]' not in ini:
-        ini += "\n[network]\ngenerateResolvConf = false\n"
-
-    else:
-        if 'generateResolvConf' not in ini:
-            ini = ini.replace('[network]', "[network]\ngenerateResolvConf = false\n")
-
-        else:
-            ini = ini.split("\n")
-            i = 0
-            for line in ini:
-                if 'generateResolvConf' in line:
-                    ini[i] = "generateResolvConf = false\n"
-                    break
-                i += 1
-            ini = "\n".join(ini)
-    open(WSL_CONF, 'w').write(ini)
+    #if '[network]' not in ini:
+    #    ini += "\n[network]\ngenerateResolvConf = false\n"
+    #else:
+    #    if 'generateResolvConf' not in ini:
+    #        ini = ini.replace('[network]', "[network]\ngenerateResolvConf = false\n")
+    #    else:
+    #        ini = ini.split("\n")
+    #        i = 0
+    #        for line in ini:
+    #            if 'generateResolvConf' in line:
+    #                ini[i] = "generateResolvConf = false\n"
+    #                break
+    #            i += 1
+    #        ini = "\n".join(ini)
+    #open(WSL_CONF, 'w').write(ini)
 
     return True
 

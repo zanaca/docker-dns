@@ -36,9 +36,19 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         os.unlink('.cache/INSTALLED')
 
     # update resolv.conf
+    if not os.path.exists(RESOLVCONF):
+        open(RESOLVCONF, 'w').write('1.1.1.1')
+
+    dns = docker.NETWORK_GATEWAY
+    try:
+        dns = OS.DNS
+    except:
+        # no DNS
+        pass
+
     RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
     if '#@docker-dns' not in RESOLVCONF_DATA:
-        RESOLVCONF_DATA = f"options timeout:1 #@docker-dns\nnameserver {docker.NETWORK_GATEWAY} #@docker-dns\n{RESOLVCONF_DATA}"
+        RESOLVCONF_DATA = f"options timeout:1 #@docker-dns\nnameserver {dns} #@docker-dns\n{RESOLVCONF_DATA}"
         open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
 
     os_config = OS.setup(tld)

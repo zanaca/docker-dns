@@ -74,8 +74,8 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
             print(line['stream'], end='')
 
     port_53 = 53
-    if util.on_linux:
-        port_53 = (NETWORK_GATEWAY, 53)
+    #if util.on_linux:
+    #    port_53 = (NETWORK_GATEWAY, 53)
 
     host_config = client.api.create_host_config(
         restart_policy={'Name': 'always'},
