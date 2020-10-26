@@ -24,7 +24,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 -   macOS: Catalina
 -   Windows: 10
 
-You can see a list of older OSes on version [1.x](/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
+You can see a list of older OSes on version [1.x](https://www.github.com/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
 
 On Windows you don't have to install Docker from WSL2 linux, you should work with Docker for windows and enable WSL2 integration.
 
