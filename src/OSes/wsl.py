@@ -34,7 +34,7 @@ rm /etc/resolv.conf || true;
 CAT <<EOL > /etc/resolv.conf
 {RESOLVCONF_HEADER}
 EOL
-cat {RESOLVCONF} >> /etc/resolv.conf
+cat {RESOLVCONF} >> /etc/resolv.conf ||  true
 """
     open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
          'w').write(resolv_script)
@@ -69,7 +69,14 @@ To finish docker-dns process please run the commands below on PowerShell as ADMI
 to enable domain resolution for the top level domain "{tld}"
 
 Commands:
-Add-DnsClientNrptRule -Namespace ".{tld}" -NameServers "127.0.0.1"
+Add-DnsClientNrptRule -Namespace ".{tld}" -Comment "docker-dns" -DnsSecEnable  -NameServers "127.0.0.1"
+
+
+
+To uninstall docker-dns from windows please run the commands below on PowerShell as ADMINISTRATOR
+
+Commands:
+Get-DnsClientNrptRule | Where {$._Namespace -eq ".docker"} | Remove-DnsClientNrptRule -PassThru -Force
 """
 
     WINDOWS_USER = __get_windows_username()
