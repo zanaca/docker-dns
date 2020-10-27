@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import os
 from argparse import ArgumentParser, Action, ArgumentTypeError as Fatal
@@ -99,7 +97,3 @@ def run():
     except KeyboardInterrupt:
         print('Keyboard interrupt: exiting.')
         return 1
-
-
-if __name__ == '__main__':
-    sys.exit(run())

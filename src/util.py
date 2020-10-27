@@ -3,7 +3,7 @@ import os
 from OpenSSL import crypto, SSL
 import shutil
 
-BASE_PATH = os.path.dirname(__file__)
+import config
 
 on_macos = platform.uname().system.lower() == 'darwin'
 on_windows = platform.uname().system.lower() == 'windows'
@@ -20,27 +20,27 @@ def is_tunnel_needed():
 
 
 def create_cache_folder():
-    if not os.path.exists(f'{BASE_PATH}/.cache'):
-        os.mkdir(f'{BASE_PATH}/.cache')
+    if not os.path.exists(f'{config.BASE_PATH}/.cache'):
+        os.mkdir(f'{config.BASE_PATH}/.cache')
 
-    if not os.path.isdir(f'{BASE_PATH}/.cache'):
-        os.unlink(f'{BASE_PATH}/.cache')
-        os.mkdir(f'{BASE_PATH}/.cache')
+    if not os.path.isdir(f'{config.BASE_PATH}/.cache'):
+        os.unlink(f'{config.BASE_PATH}/.cache')
+        os.mkdir(f'{config.BASE_PATH}/.cache')
 
 
 def read_cache(item):
     create_cache_folder()
 
-    if not os.path.exists(f'{BASE_PATH}/.cache/{item}'):
+    if not os.path.exists(f'{config.BASE_PATH}/.cache/{item}'):
         return None
 
-    return open(f'{BASE_PATH}/.cache/{item}', 'r').read()
+    return open(f'{config.BASE_PATH}/.cache/{item}', 'r').read()
 
 
 def write_cache(item, value):
     create_cache_folder()
 
-    return open(f'{BASE_PATH}/.cache/{item}', 'w').write(value)
+    return open(f'{config.BASE_PATH}/.cache/{item}', 'w').write(value)
 
 
 def is_super_user():
@@ -79,7 +79,7 @@ def generate_certificate(
 
 
 def check_if_installed():
-    return os.path.exists(f'{BASE_PATH}/.cache/INSTALLED')
+    return os.path.exists(f'{config.BASE_PATH}/.cache/INSTALLED')
 
 
 def remove_dir(base_path):

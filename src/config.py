@@ -10,7 +10,7 @@ APP = os.path.basename(sys.argv[0])
 
 HOME = os.path.expanduser("~")
 HOME_ROOT = os.path.expanduser("~root")
-PWD = os.getcwd
+BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 HOSTNAME = socket.gethostname()
 HOSTUNAME = platform.uname().system
 
