@@ -90,7 +90,7 @@ Get-DnsClientNrptRule | Where {{$._Namespace -eq ".docker"}} | Remove-DnsClientN
     open(
         f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
     os.system(
-        f'{NOTEPAD_PATH} C;\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
+        f'{NOTEPAD_PATH} C:\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
 
 
 def setup(tld = config.TOP_LEVEL_DOMAIN):
