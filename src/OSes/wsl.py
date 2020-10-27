@@ -16,8 +16,8 @@ DNS = '127.0.0.1'
 DISABLE_MAIN_RESOLVCONF_ROUTINE = True
 RESOLVCONF = '/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
-NOTEPAD_PATH = '/mnt/c/Windows/Wystem32/notepad.exe'
-POWERSHELL_PATH = '/mnt/c/Windows/WindowsPowerShell/v1.0//powershell.exe'
+NOTEPAD_PATH = '/mnt/c/Windows/System32/notepad.exe'
+POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
     DNSMASQ_LOCAL_CONF = DNSMASQ_LOCAL_CONF.replace('dnsmasq.d', 'conf.d')
@@ -30,9 +30,11 @@ def __generate_resolveconf():
     open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
 
     resolv_script = f"""#!/usr/bin/env sh
-rm /etc/resovl.conf;
-echo "{RESOLVCONF_HEADER}\n" > /etc/resolv.conf
-cat ${RESOLVCONF} >> /etc/resolv.conf
+rm /etc/resolv.conf || true;
+CAT <<EOL > /etc/resolv.conf
+{RESOLVCONF_HEADER}
+EOL
+cat {RESOLVCONF} >> /etc/resolv.conf
 """
     open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
          'w').write(resolv_script)
@@ -55,7 +57,7 @@ WantedBy=default.target"""
 
 def __get_windows_username():
     return os.popen(
-        "{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
+        f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
 def __generate_powershellbat(tld=None):
@@ -63,7 +65,8 @@ def __generate_powershellbat(tld=None):
         return False
 
     script = f"""
-To finish docker-dns process please run the commands below on PowerShell as ADMINISTRATOR to enable domain resolution for the top level domain "{tld}"
+To finish docker-dns process please run the commands below on PowerShell as ADMINISTRATOR
+to enable domain resolution for the top level domain "{tld}"
 
 Commands:
 Add-DnsClientNrptRule -Namespace ".{tld}" -NameServers "127.0.0.1"
@@ -73,7 +76,7 @@ Add-DnsClientNrptRule -Namespace ".{tld}" -NameServers "127.0.0.1"
     open(
         f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
     os.system(
-        f'{NOTEPAD_PATH} /mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt')
+        f'{NOTEPAD_PATH} C;\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
 
 
 def setup(tld=config.TOP_LEVEL_DOMAIN):
