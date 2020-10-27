@@ -162,8 +162,6 @@ printf "Downloading and installing docker-dns.\n"
 
   cd ${DESTINATION}
 
-  run_sudo git checkout feature/2.0
-
   PIP=$(check_if_python)
   sudo -H ${PIP} install -r ${DESTINATION}/requirements.txt
 
