@@ -24,35 +24,42 @@ if not os.path.exists(DNSMASQ_LOCAL_CONF):
 
 
 def __generate_resolveconf():
-    RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
+    if os.path.exists(RESOLVCONF):
+        RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
 
-    RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
-    open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
+        RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
+        open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
 
-    resolv_script = f"""#!/usr/bin/env sh
-rm /etc/resolv.conf || true;
-CAT <<EOL > /etc/resolv.conf
-{RESOLVCONF_HEADER}
-EOL
-cat {RESOLVCONF} >> /etc/resolv.conf ||  true
-"""
-    open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
-         'w').write(resolv_script)
-    os.chmod(f'{config.BASE_PATH}/bin/docker-dns.service.sh', 0o744)
+        resolv_script = f"""#!/usr/bin/env sh
+    rm /etc/resolv.conf || true;
+    CAT <<EOL > /etc/resolv.conf
+    {RESOLVCONF_HEADER}
+    EOL
+    cat {RESOLVCONF} >> /etc/resolv.conf ||  true
+    """
+        open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
+            'w').write(resolv_script)
+        os.chmod(f'{config.BASE_PATH}/bin/docker-dns.service.sh', 0o744)
 
-    service_script = f"""[Unit]
-After=network.service
+        service_script = f"""[Unit]
+    After=network.service
 
-[Service]
-ExecStart={config.BASE_PATH}/bin/docker-dns.service.sh
+    [Service]
+    ExecStart={config.BASE_PATH}/bin/docker-dns.service.sh
 
-[Install]
-WantedBy=default.target"""
-    open('/etc/systemd/system/docker-dns.service', 'w').write(service_script)
-    os.chmod('/etc/systemd/system/docker-dns.service', 0o664)
+    [Install]
+    WantedBy=default.target"""
+        open('/etc/systemd/system/docker-dns.service', 'w').write(service_script)
+        os.chmod('/etc/systemd/system/docker-dns.service', 0o664)
 
-    os.system('sudo systemctl daemon-reload > /dev/null')
-    os.system('sudo systemctl enable docker-dns.service > /dev/null')
+        os.system('sudo systemctl daemon-reload > /dev/null')
+        os.system('sudo systemctl enable docker-dns.service > /dev/null')]
+    else:
+        RESOLVCONF_DATA = open('/etc/resolv.conf', 'r').read()
+
+        RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
+        open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
+
 
 
 def __get_windows_username():
@@ -60,11 +67,11 @@ def __get_windows_username():
         f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
-def __generate_powershellbat(tld=None):
+def __generate_powershellbat(tld = None):
     if not tld:
         return False
 
-    script = f"""
+    script=f"""
 To finish docker-dns process please run the commands below on PowerShell as ADMINISTRATOR
 to enable domain resolution for the top level domain "{tld}"
 
@@ -76,17 +83,17 @@ Add-DnsClientNrptRule -Namespace ".{tld}" -Comment "docker-dns" -DnsSecEnable  -
 To uninstall docker-dns from windows please run the commands below on PowerShell as ADMINISTRATOR
 
 Commands:
-Get-DnsClientNrptRule | Where {$._Namespace -eq ".docker"} | Remove-DnsClientNrptRule -PassThru -Force
+Get-DnsClientNrptRule | Where {{$._Namespace -eq ".docker"}} | Remove-DnsClientNrptRule -PassThru -Force
 """
 
-    WINDOWS_USER = __get_windows_username()
+    WINDOWS_USER=__get_windows_username()
     open(
         f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
     os.system(
         f'{NOTEPAD_PATH} C;\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
 
 
-def setup(tld=config.TOP_LEVEL_DOMAIN):
+def setup(tld = config.TOP_LEVEL_DOMAIN):
     if not os.path.isdir('/etc/resolver'):
         os.mkdir('/etc/resolver')
     open(f'/etc/resolver/{tld}',
@@ -94,7 +101,7 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
 
     # DO NOT DISABLE WSL RESOLV.CONF GENARATION!!! IT WILL BREAK LINUX FOR NOW
     #
-    #ini = ''
+    # ini = ''
     # if os.path.exists(WSL_CONF):
     #    ini = open(WSL_CONF, 'r').read()
 
@@ -112,12 +119,12 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
     #                break
     #            i += 1
     #        ini = "\n".join(ini)
-    #open(WSL_CONF, 'w').write(ini)
+    # open(WSL_CONF, 'w').write(ini)
 
     return True
 
 
-def install(tld=config.TOP_LEVEL_DOMAIN):
+def install(tld = config.TOP_LEVEL_DOMAIN):
     print('Generating known_hosts backup for user "root", if necessary')
     if not os.path.exists(f'{config.HOME_ROOT}/.ssh'):
         os.mkdir(f'{config.HOME_ROOT}/.ssh')
@@ -128,10 +135,10 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
                      f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
     time.sleep(3)
-    port = False
-    ports = docker.get_exposed_port(config.DOCKER_CONTAINER_NAME)
+    port=False
+    ports=docker.get_exposed_port(config.DOCKER_CONTAINER_NAME)
     if '22/tcp' in ports:
-        port = int(ports['22/tcp'][0]['HostPort'])
+        port=int(ports['22/tcp'][0]['HostPort'])
     if not port:
         raise('Problem fetching ssh port')
 
@@ -141,19 +148,19 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     # Running the powershell bat script makes the resolvconf generation OBSOLETE
     __generate_resolveconf()
 
-    __generate_powershellbat(tld=tld)
+    __generate_powershellbat(tld = tld)
 
     # create etc/resolv.conf for
     return True
 
 
-def uninstall(tld=config.TOP_LEVEL_DOMAIN):
+def uninstall(tld = config.TOP_LEVEL_DOMAIN):
     if os.path.exists(f'/etc/resolver/{tld}'):
         print('Removing resolver file')
         os.unlink(f'/etc/resolver/{tld}')
 
-    ini = open(WSL_CONF, 'r').read()
-    ini = ini.replace('ngenerateResolvConf = false',
+    ini=open(WSL_CONF, 'r').read()
+    ini=ini.replace('ngenerateResolvConf = false',
                       'ngenerateResolvConf = true')
     open(WSL_CONF, 'w').write(ini)
 
@@ -164,7 +171,7 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         print('Removing kwown_hosts backup')
         os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
-    WINDOWS_USER = __get_windows_username()
+    WINDOWS_USER=__get_windows_username()
     if os.path.exists(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat'):
         print('Removing bat file from Windows Desktop')
         os.unlink(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat')
