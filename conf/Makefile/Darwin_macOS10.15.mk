@@ -5,6 +5,7 @@ DOCKER_CONF_FOLDER := $(HOME)/Library/Containers/com.docker.docker/Data/database
 DNSs := $(shell scutil --dns | grep nameserver | cut -d: -f2 | sort | uniq | sed s/\ //g | sed ':a;N;$!ba;s/\\\n/","/g');
 DNSs := $(shell echo "${DNSs}" | sed s/\ /\",\"/g | sed s/\;//g)
 DNSMASQ_LOCAL_CONF := /usr/local/etc/dnsmasq.conf
+NETWORKMANAGER_CONF_D:=/tmp/dummy
 RESOLVCONF := /etc/resolv.conf
 
 
