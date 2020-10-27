@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.zanaca.dockerdns-tunnel</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>{PWD}/__main__.py tunnel</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardErrorPath</key>
+	  <string>/tmp/dockerdns-tunnel.log</string>
+	  <key>UserName</key>
+	  <string>root</string>
+  </dict>
+</plist>

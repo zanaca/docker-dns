@@ -1,64 +1,85 @@
 # Docker DNS
 
-Docker DNS creates a container that works as a DNS for docker containers in you machine. Every running container will be accessible by `$container_name.docker` for example. You could inform you own domain if you like. Your domains are available *inside* and *outside* docker, but just for you machine. For example, you could access *http://nginx.docker* from your browser window OR from inside a container.
+Docker DNS creates a container that works as a DNS for docker containers in you machine. Every running container will be accessible by `$container_name.docker` for example. You could inform you own domain if you like. Your domains are available _inside_ and _outside_ docker, but just for you machine. For example, you could access *http://nginx.docker* from your browser window OR from inside a container.
 
 It was created to allow you to work in a container as if was a "real" server setup. You will have access to all ports/services inside the container without need to expose all the ports. You can publish ports as well to access it like the old way. E.g.: 127.0.0.1:8080 -> container_ip:80
 
-It was tested on linux and macOS sierra. macOS environment has a downside that you will always run the `make tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity just in case.
+It was tested on linux and macOS Catalina. macOS environment has a downside that you will always run the `./bin/docker-dns tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity or you can run the application 'dockerdns-tunnel', available on `~/Applications`.
 
 The main usage is for development environment only, should not be used in production environment.
 
-By default it will enable create that hosts: *ns0.docker* and *ns0.$YOUR_HOSTNAME.docker*.
+By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNAME.docker_.
 
+## Requirements
 
+-   [Docker](https://www.docker.com/products/docker-desktop)
+-   Python3
+-   pip
 
-### Supported commands
- - `make install` - Set up all environment;
+## Tested enviroment
 
- - `make uninstall` - Remove configuration files from your system;
+-   Docker 19.03.13
+-   Ubuntu: 20.04
+-   macOS: Catalina
+-   Windows: 10 (WSL2 - Ubuntu)
 
- - `make show-domain` - Show the working domain of your installation;
+You can see a list of older OSes on version [1.x](https://www.github.com/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
 
- - `make tunnel` - Create a tunnel to route all traffic to you docker containers. Available only in macOS, on linux you don't need that feature.
+On Windows you don't have to install Docker inside WSL2 linux, you should work with Docker for windows and enable WSL2 integration.
 
+#### \* Windows reminder
 
+At that stage you will be accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example **but not** from your Edge browser window. A solution is being designed.
 
-### Options
-In `make install` you can pass some variables to change how setup is done. You can change the working domain for example.
- - *tld*: working domain. It can be any domain name but the domains designed to work in loopback network. For example `yourmachine.dev` will create names like `CONTAINER_NAME.yourmachine.dev`. You can have `docker.your_real_domain.com` as well so it will create names like `CONTAINER_NAME.docker.your_real_domain.com . Default value: `docker`;
+## Install
 
- - *tag*: Tag name for the created docker image. It should be changed only if you have a name conflict  Default value: `ns0`
+For an simple installation process, paste the command in a macOS Terminal, Linux or WSL shell prompt.
 
- - *name*: Running container name. Default value: the *tag* name
+`$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
+
+-   The script will place docker-dns inside `/usr/local/docker-dns`
+
+Or if you preffer, you can simple checkout the code in any folder of your choice and:
+
+-   Install all python dependencies by running `pip3 install -r requirements.txt`
+-   Execute ./bin/docker-dns install
+
+## Supported commands
+
+-   `install` - Set up all environment;
+
+-   `uninstall` - Remove configuration files from your system;
+
+-   `show-domain` - Show the working domain of your installation;
+
+-   `tunnel` - Create a tunnel to route all traffic to you docker containers. Available only in macOS, on linux you don't need that feature;
+
+-   `status` - Show the current status for your machine.
+
+You can see the list of all available commands and options running `./bin/docker-dns -h`
+
+## Options
+
+On `install` command you can pass some variables to change how setup is done. You can change the working domain for example.
+
+-   _tld_: working domain. It can be any domain name but the domains designed to work in loopback network. For example `yourmachine.dev` will create names like `CONTAINER_NAME.yourmachine.dev`. You can have `docker.your_real_domain.com` as well so it will create names like `CONTAINER_NAME.docker.your_real_domain.com . Default value: `docker`;
+
+-   _tag_: Tag name for the created docker image. It should be changed only if you have a name conflict Default value: `ns0`;
+
+-   _name_: Running container name. Default value: the _tag_ value.
 
 Example:
-     `make install tld=docker.dev tag=dns`
-Will create a docker image name *dns* and it will be available as *dns.docker.dev* so you could run `dig www.google.com @dns.docker.dev`
+`./bin/docker-dns install tld=docker.dev tag=dns`
+Will create a docker image name _dns_ and it will be available as _dns.docker.dev_ so you could run `dig www.google.com @dns.docker.dev`
 
-### Requirements
- - [Docker CE](https://www.docker.com) or [Docker for mac](https://www.docker.com/docker-mac)
- - [Homebrew](https://brew.sh/) for macOS machines
+## Troubleshooting
 
+If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
 
-### Tested enviroment
- - Docker 17.0.4.0-ce
- - Docker for mac 17.06.0-ce, 17.09.1-ce-mac42
- - Ubuntu: 16.04, 17.04, 17.10, 18.04, 20.04
- - Fedora: 27
- - macOS: Sierra, High Sierra, Mojave, Catalina
-
-
-
-### Troubleshooting
-
-If you are using macOS, on restart, you will loose access to your containers. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo make tunnel` from docker-dns folder
-
-
-### License
+## License
 
 [MIT](LICENSE.md)
 
+## Thanks
 
-### Thanks
-
-- Thanks to https://github.com/apenwarr/sshuttle for the great poor's man VPN service! An easy way to setup tunneling on macOS
+-   Thanks to https://github.com/apenwarr/sshuttle for the great poor's man VPN service! An easy way to setup tunneling on macOS and Windows WSL
