@@ -72,7 +72,7 @@ def __generate_powershellbat(tld=None):
         return False
 
     script = f"""
-To finish docker-dns process please run the commands below on PowerShell as ADMINISTRATOR
+To finish docker-dns installation please run the commands below on PowerShell as ADMINISTRATOR
 to enable domain resolution for the top level domain "{tld}"
 
 Commands:
@@ -83,7 +83,7 @@ Add-DnsClientNrptRule -Namespace ".{tld}" -Comment "docker-dns" -DnsSecEnable  -
 To uninstall docker-dns from windows please run the commands below on PowerShell as ADMINISTRATOR
 
 Commands:
-Get-DnsClientNrptRule | Where {{$._Namespace -eq ".docker"}} | Remove-DnsClientNrptRule -PassThru -Force
+Get-DnsClientNrptRule | Where {{$_.Namespace -eq ".docker"}} | Remove-DnsClientNrptRule -PassThru -Force
 """
 
     WINDOWS_USER = __get_windows_username()
