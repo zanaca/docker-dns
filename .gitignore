@@ -1,5 +1,4 @@
 Dockerfile_id_rsa*
-conf/certs.d/*
-macos-tunnel.sh
+certs.d/gen/*
 .cache
 __pycache__

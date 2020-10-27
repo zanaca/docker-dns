@@ -33,9 +33,10 @@ FROM alpine:latest AS base_oses
         echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
 
 FROM base_oses AS windows
-    EXPOSE 1194/udp
+    EXPOSE 11194/udp
+    ENV OPENVPN_EXISTS=1
 
-    RUN apk add openvpn=2.4.3-r0 git openssl && \
+    RUN apk add --no-cache openvpn git openssl iptables && \
     # Get easy-rsa
         git clone https://github.com/OpenVPN/easy-rsa.git /tmp/easy-rsa && \
         cd && \
@@ -44,11 +45,12 @@ FROM base_oses AS windows
         rm -rf /tmp/easy-rsa/.git && cp -a /tmp/easy-rsa /usr/local/share/ && \
         rm -rf /tmp/easy-rsa/ && \
         ln -s /usr/local/share/easy-rsa/easyrsa3/easyrsa /usr/local/bin
-    
+
+    #RUN modprobe tun
+    #    echo "tun" >> /etc/modules-load.d/tun.conf
+
     ADD src/templates/openvpn.conf /etc/openvpn/openvpn.conf
     RUN mkdir /etc/openvpn/certs.d
-    ADD conf/certs.d /etc/openvpn/certs.d
+    ADD certs.d/ovpn/* /etc/openvpn/certs.d/
     RUN chmod 600 /etc/openvpn/certs.d/*.key
 
-    RUN modprobe tun; \
-        echo "tun" >> /etc/modules-load.d/tun.conf

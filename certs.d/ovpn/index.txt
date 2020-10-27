@@ -1,0 +1,2 @@
+V	271221201225Z		01	unknown	/C=US/ST=CA/L=Simple OpenVPN server/O=openvpn-udp-1194/CN=myserver/emailAddress=me@myhost.mydomain
+V	271221201225Z		02	unknown	/C=US/ST=CA/L=Simple OpenVPN server/O=openvpn-udp-1194/CN=client1-openvpn-udp-1194/emailAddress=me@myhost.mydomain
