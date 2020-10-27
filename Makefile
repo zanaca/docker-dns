@@ -7,7 +7,7 @@ name ?= $(shell test -f .cache/name && cat .cache/name || echo '${tag}')
 
 install: warning
 	@sudo -H pip3 install -r requirements.txt
-	@./src/__main__.py install -t "$(tag)" -d "$(tld)" -n "$(name)" 
+	@./src/__main__.py install -t "$(tag)" -d "$(tld)" -n "$(name)"
 
 uninstall: warning
 	@./src/__main__.py uninstall
@@ -19,4 +19,4 @@ tunnel: warning
 	@./src/__main__.py tunnel
 
 warning:
-	@echo "\nWARNING: Deprecated Makefile usage, please use \"./docker-dns\" command\n"
+	@echo "\nWARNING: Deprecated Makefile usage, please use \"./bin/docker-dns\" command\n"
