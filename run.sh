@@ -128,18 +128,22 @@ grab_information() {
 
 }
 
-printf "Starting instalation process.\n"
-if [ ${EUID} == 0 ]; then
-  printf "\n"
-else
-  printf "Inform your password to proceed with installation.\n"
-  run_sudo printf "\n"
-fi
+printf "\033[33m     _            _                      _            \n"
+printf "  __| | ___   ___| | _____ _ __       __| |_ __  ___  \n"
+printf " / _\` |/ _ \ / __| |/ / _ \ '__|____ / _\` | '_ \/ __| \n"
+printf "| (_| | (_) | (__|   <  __/ | |_____| (_| | | | \__ \ \n"
+printf " \__,_|\___/ \___|_|\_\___|_|        \__,_|_| |_|___/ \n"
+printf "       Host machine DNS for Docker Containers"
+printf "\033[m\n\n"
+
+
+printf "Starting instalation process\n"
+printf "Eventually you will be asked for you password to perform \"sudo\" steps.\n\n"
 
 grab_information
 
 while true; do
-  printf "\nPlease confirm that:\nContainer name is \"${DDNS_NAME}\"\nImage tag name is \"${DDNS_TAG}\"\nWorking domain is \"${DDNS_TLD}\"\nIs that correct? [y/N] "
+  printf "\nPlease confirm the information below\nContainer name: ${DDNS_NAME}\nImage tag name: ${DDNS_TAG}\nWorking domain: ${DDNS_TLD}\nIs that correct? [y/N] "
   read USER_ANSWER
   case $USER_ANSWER in
     [Yy]* ) printf "\n"; break;;
@@ -164,6 +168,8 @@ printf "Downloading and installing docker-dns.\n"
   sudo -H ${PIP} install -r ${DESTINATION}/requirements.txt
 
   run_sudo ./bin/docker-dns install -t "${DDNS_TAG}" -n "${DDNS_NAME}" -d "${DDNS_TLD}"
+
+  ./bin/docker-dns status
 
   show_path_advice
 
