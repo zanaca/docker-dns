@@ -16,6 +16,8 @@ DNS = '127.0.0.1'
 DISABLE_MAIN_RESOLVCONF_ROUTINE = True
 RESOLVCONF = '/var/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
+NOTEPAD_PATH = '/mnt/c/Windows/Wystem32/notepad.exe'
+POWERSHELL_PATH = '/mnt/c/Windows/WindowsPowerShell/v1.0//powershell.exe'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
     DNSMASQ_LOCAL_CONF = DNSMASQ_LOCAL_CONF.replace('dnsmasq.d', 'conf.d')
@@ -53,7 +55,7 @@ WantedBy=default.target"""
 
 def __get_windows_username():
     return os.popen(
-        "powershell.exe '$env:UserName'").read().split('\n')[0]
+        "{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
 def __generate_powershellbat(tld=None):
@@ -61,15 +63,17 @@ def __generate_powershellbat(tld=None):
         return False
 
     script = f"""
-@echo "Enable DNS for top level domain "{tld}"    
-Add-DnsClientNrptRule -Namespace "{tld}" -NameServers "127.0.0.1"
+To finish docker-dns process please run the commands below on PowerShell as ADMINISTRATOR to enable domain resolution for the top level domain "{tld}"
+
+Commands:
+Add-DnsClientNrptRule -Namespace ".{tld}" -NameServers "127.0.0.1"
 """
 
     WINDOWS_USER = __get_windows_username()
     open(
-        f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat', 'w').write(script)
+        f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
     os.system(
-        f'powershell.exec /mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat')
+        f'{NOTEPAD_PATH} /mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt')
 
 
 def setup(tld=config.TOP_LEVEL_DOMAIN):
@@ -125,7 +129,7 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
         f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
 
     # Running the powershell bat script makes the resolvconf generation OBSOLETE
-    # __generate_resolveconf()
+    __generate_resolveconf()
 
     __generate_powershellbat(tld=tld)
 
