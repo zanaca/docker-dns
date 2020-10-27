@@ -32,12 +32,14 @@ def __generate_resolveconf():
             open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
 
         resolv_script = f"""#!/usr/bin/env sh
-    rm /etc/resolv.conf || true;
-    CAT <<EOL > /etc/resolv.conf
-    {RESOLVCONF_HEADER}
-    EOL
-    cat {RESOLVCONF} >> /etc/resolv.conf ||  true
-    """
+rm /etc/resolv.conf || true;
+cat <<EOL > /etc/resolv.conf
+{RESOLVCONF_HEADER}
+EOL
+
+cat {RESOLVCONF} >> /etc/resolv.conf ||  true
+{PWD}/bin/docker-dns tunnel &
+"""
         open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
              'w').write(resolv_script)
         os.chmod(f'{config.BASE_PATH}/bin/docker-dns.service.sh', 0o744)
