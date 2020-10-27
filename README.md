@@ -4,7 +4,7 @@ Docker DNS creates a container that works as a DNS for docker containers in you 
 
 It was created to allow you to work in a container as if was a "real" server setup. You will have access to all ports/services inside the container without need to expose all the ports. You can publish ports as well to access it like the old way. E.g.: 127.0.0.1:8080 -> container_ip:80
 
-It was tested on linux and macOS Catalina. macOS environment has a downside that you will always run the `./docker-dns tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity or you can run the application 'dockerdns-tunnel', available on `~/Applications`.
+It was tested on linux and macOS Catalina. macOS environment has a downside that you will always run the `./bin/docker-dns tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity or you can run the application 'dockerdns-tunnel', available on `~/Applications`.
 
 The main usage is for development environment only, should not be used in production environment.
 
@@ -43,7 +43,7 @@ For an simple installation process, paste the command in a macOS Terminal, Linux
 Or if you preffer, you can simple checkout the code in any folder of your choice and:
 
 -   Install all python dependencies by running `pip3 install -r requirements.txt`
--   Execute ./docker-dns install
+-   Execute ./bin/docker-dns install
 
 ## Supported commands
 
@@ -57,7 +57,7 @@ Or if you preffer, you can simple checkout the code in any folder of your choice
 
 -   `status` - Show the current status for your machine.
 
-You can see the list of all available commands and options running `./docker-dns -h`
+You can see the list of all available commands and options running `./bin/docker-dns -h`
 
 ## Options
 
@@ -70,12 +70,12 @@ On `install` command you can pass some variables to change how setup is done. Yo
 -   _name_: Running container name. Default value: the _tag_ value.
 
 Example:
-`./docker-dns install tld=docker.dev tag=dns`
+`./bin/docker-dns install tld=docker.dev tag=dns`
 Will create a docker image name _dns_ and it will be available as _dns.docker.dev_ so you could run `dig www.google.com @dns.docker.dev`
 
 ## Troubleshooting
 
-If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./docker-dns tunnel` from docker-dns folder
+If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
 
 ## License
 
