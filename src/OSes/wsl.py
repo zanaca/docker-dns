@@ -67,7 +67,7 @@ Add-DnsClientNrptRule -Namespace "{tld}" -NameServers "127.0.0.1"
 
     WINDOWS_USER = __get_windows_username()
     open(
-        f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat', w).write(script)
+        f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat', 'w').write(script)
     os.system(
         f'powershell.exec /mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat')
 
