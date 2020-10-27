@@ -27,8 +27,9 @@ def __generate_resolveconf():
     if os.path.exists(RESOLVCONF):
         RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
 
-        RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
-        open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
+        if '#@docker-dns' not in RESOLVCONF_DATA:
+            RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
+            open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
 
         resolv_script = f"""#!/usr/bin/env sh
     rm /etc/resolv.conf || true;
