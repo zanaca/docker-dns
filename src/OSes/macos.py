@@ -7,7 +7,7 @@ import dockerapi as docker
 import util
 import network
 
-
+FLAVOR = 'macos'
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'

@@ -14,13 +14,13 @@ if util.on_macos:
     import OSes.macos as OS
 
 elif util.on_wsl:
-    import OSes.wsl as OS
+    import OSes.windows_wsl2 as OS
 
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.ubuntu as OS
-    else:
-        import OSes.debian as OS
+    # else:
+    #    import OSes.debian as OS
 
 RESOLVCONF = '/etc/resolv.conf'
 
@@ -32,11 +32,14 @@ def update_cache():
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
+    if not util.is_os_supported(OS.FLAVOR):
+        return False
+
     if os.path.exists('.cache/INSTALLED'):
         os.unlink('.cache/INSTALLED')
 
     # update resolv.conf
-    if not OS.DISABLE_MAIN_RESOLVCONF_ROUTINE:
+    if not hasattr(OS, 'DISABLE_MAIN_RESOLVCONF_ROUTINE'):
         if not os.path.exists(RESOLVCONF):
             open(RESOLVCONF, 'w').write('nameserver 1.1.1.1')
 

@@ -8,6 +8,7 @@ import util
 import network
 import tunnel
 
+FLAVOR = 'windows.wsl2'
 DOCKER_CONF_FOLDER = '/etc/docker'
 DNSMASQ_LOCAL_CONF = '/etc/NetworkManager/dnsmasq.d/01_docker'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'

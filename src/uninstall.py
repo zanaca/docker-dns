@@ -12,7 +12,7 @@ if util.on_macos:
     import OSes.macos as OS
 
 elif util.on_wsl:
-    import OSes.wsl as OS
+    import OSes.windows_wsl2 as OS
 
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
