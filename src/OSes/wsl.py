@@ -38,7 +38,7 @@ cat <<EOL > /etc/resolv.conf
 EOL
 
 cat {RESOLVCONF} >> /etc/resolv.conf ||  true
-{PWD}/bin/docker-dns tunnel &
+{config.BASE_PATH}/bin/docker-dns tunnel &
 """
         open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
              'w').write(resolv_script)
