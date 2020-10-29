@@ -16,10 +16,11 @@ SIOCSIFADDR = 0x8916
 def connect(verbose=False):
     if not util.is_tunnel_needed():
         print("You do not need to create a tunnel")
-        sys.exit(0)
+        return 0
 
     if not util.is_super_user():
-        exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+        print("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+        return 1
 
     docker_container_name = config.DOCKER_CONTAINER_NAME
 
@@ -44,6 +45,7 @@ def connect(verbose=False):
     # while True:
     sshuttle_fake_caller()
     #    time.sleep(1)
+    return 0
 
 
 def check_if_running():
@@ -51,7 +53,7 @@ def check_if_running():
         return docker.check_if_tunnel_is_connected(config.DOCKER_CONTAINER_NAME)
 
     except docker.errors.NotFound as e:
-        return Flase
+        return False
     except Exception as e:
         print(f'Error: {e}')
         return False

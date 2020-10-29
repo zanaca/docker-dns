@@ -24,7 +24,7 @@ elif util.on_linux:
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
     if not util.check_if_installed():
         print('No installation found')
-        sys.exit(1)
+        return 1
 
     print('Uninstalling docker dns exposure')
     if docker.check_exists(name):
@@ -40,3 +40,4 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         json.dump(docker_json, open(DOCKER_CONF_FILE, 'w'))
 
     OS.uninstall(tld)
+    return 0

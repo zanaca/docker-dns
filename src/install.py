@@ -33,7 +33,7 @@ def update_cache():
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
     if not util.is_os_supported(OS.FLAVOR):
-        return False
+        return 1
 
     if os.path.exists('.cache/INSTALLED'):
         os.unlink('.cache/INSTALLED')
@@ -107,4 +107,4 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         os.system(' '.join(original_arg))
 
     open('.cache/INSTALLED', 'w').write('')
-    return True
+    return 0
