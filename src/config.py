@@ -8,8 +8,10 @@ import json
 
 APP = os.path.basename(sys.argv[0])
 
-
-HOME = os.path.expanduser("~")
+USER = os.environ.get('SUDO_USER')
+if not USER:
+    USER = os.environ.get('USER')
+HOME = os.path.expanduser(f"~{USER}")
 HOME_ROOT = os.path.expanduser("~root")
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
 HOSTNAME = socket.gethostname()
