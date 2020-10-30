@@ -38,26 +38,47 @@ cat <<EOL > /etc/resolv.conf
 {RESOLVCONF_HEADER}
 EOL
 
-cat {RESOLVCONF} >> /etc/resolv.conf ||  true
+if [ -f "{RESOLVCONF}" ]; then
+    cat {RESOLVCONF} >> /etc/resolv.conf
+fi
+
+TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
+if [ "$TUNNEL_RUNNING" -eq 1 ]; then
 {config.BASE_PATH}/bin/docker-dns tunnel &
+fi
 """
         open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
              'w').write(resolv_script)
         os.chmod(f'{config.BASE_PATH}/bin/docker-dns.service.sh', 0o744)
 
-        service_script = f"""[Unit]
-    After=network.service
+#        service_script = f"""[Unit]
+# After=network.service
 
-    [Service]
-    ExecStart={config.BASE_PATH}/bin/docker-dns.service.sh
+# [Service]
+# ExecStart={config.BASE_PATH}/bin/docker-dns.service.sh
 
-    [Install]
-    WantedBy=default.target"""
-        open('/etc/systemd/system/docker-dns.service', 'w').write(service_script)
-        os.chmod('/etc/systemd/system/docker-dns.service', 0o664)
+# [Install]
+# WantedBy=default.target"""
+#        open('/etc/systemd/system/docker-dns.service', 'w').write(service_script)
+#        os.chmod('/etc/systemd/system/docker-dns.service', 0o664)
 
-        os.system('sudo systemctl daemon-reload > /dev/null')
-        os.system('sudo systemctl enable docker-dns.service > /dev/null')
+#        os.system('sudo systemctl daemon-reload > /dev/null')
+#        os.system('sudo systemctl enable docker-dns.service > /dev/null')
+
+        # Gotta find a better way to start that service, as real services does not work on WSL2 as you have microsoft's init.
+        bashrc_content = open(f'{config.HOME}/.bashrc', 'r').read()
+        if 'TUNNEL_RUNNING' not in bashrc_content:
+            service_script = f"""
+# docker-dns "service"  for windows wsl2
+TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
+if [ "$TUNNEL_RUNNING" -eq 1 ]; then
+    {config.BASE_PATH}/bin/docker-dns.service.sh
+fi
+
+"""
+            bashrc_content = f"{bashrc_content}\n{service_script}"
+            open(f'{config.HOME}/.bashrc', 'w').write(bashrc_content)
+
     else:
         RESOLVCONF_DATA = open('/etc/resolv.conf', 'r').read()
 
