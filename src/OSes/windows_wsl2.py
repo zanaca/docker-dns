@@ -84,8 +84,7 @@ fi
 
     service_script = f"""
 # docker-dns "service"  for windows wsl2
-TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
-[ "$TUNNEL_RUNNING" -le 1 ] && {config.BASE_PATH}/bin/docker-dns.service.sh
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns.service.sh
 # docker-dns end
 """
     bashrc_content = f"{bashrc_content}\n{service_script}"
