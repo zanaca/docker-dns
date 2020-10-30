@@ -49,7 +49,7 @@ else
 fi
 rm /tmp/resolv.ddns
 
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns.service.sh
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns tunnel
 """
     RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
     open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
@@ -85,7 +85,7 @@ rm /tmp/resolv.ddns
 
     service_script = f"""
 # docker-dns "service"  for windows wsl2
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns.service.sh
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh
 # docker-dns end
 """
     bashrc_content = f"{bashrc_content}\n{service_script}"
