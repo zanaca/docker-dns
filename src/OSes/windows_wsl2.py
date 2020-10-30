@@ -49,7 +49,7 @@ else
 fi
 rm /tmp/resolv.ddns
 
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns tunnel
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns tunnel
 """
     RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
     open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
@@ -90,6 +90,8 @@ rm /tmp/resolv.ddns
 """
     bashrc_content = f"{bashrc_content}\n{service_script}"
     open(f'{config.HOME}/.bashrc', 'w').write(bashrc_content)
+    os.system(
+        f"echo '%sudo   ALL=(ALL) NOPASSWD: {config.BASE_PATH}/bin/docker-dns.service.sh' > /etc/sudoers.d/99-dockerdns.conf")
 
 
 def __get_windows_username():
