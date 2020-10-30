@@ -73,12 +73,20 @@ fi
 
     # Gotta find a better way to start that service, as real services does not work on WSL2 as you have microsoft's init.
     bashrc_content = open(f'{config.HOME}/.bashrc', 'r').read()
-    if 'TUNNEL_RUNNING' not in bashrc_content:
-        service_script = f"""
+    if 'TUNNEL_RUNNING' in bashrc_content:
+        bashrc_content_pre = bashrc_content.split('# docker-dns "service"')[0]
+        bashrc_content_pos = bashrc_content.split('# docker-dns end')
+        if len(bashrc_content_pos) == 1:
+            bashrc_content_pos = bashrc_content_pos[0]
+        else:
+            bashrc_content_pos = bashrc_content_pos[1]
+        bashrc_content = f'{bashrc_content_pre}{bashrc_content_pos}'
+
+    service_script = f"""
 # docker-dns "service"  for windows wsl2
 TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
 [ "$TUNNEL_RUNNING" -le 1 ] && {config.BASE_PATH}/bin/docker-dns.service.sh
-
+# docker-dns end
 """
     bashrc_content = f"{bashrc_content}\n{service_script}"
     open(f'{config.HOME}/.bashrc', 'w').write(bashrc_content)
