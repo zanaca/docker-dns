@@ -25,31 +25,38 @@ if not os.path.exists(DNSMASQ_LOCAL_CONF):
 
 
 def __generate_resolveconf():
+    resolv_script = None
     if os.path.exists(RESOLVCONF):
         RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
 
-        if '#@docker-dns' not in RESOLVCONF_DATA:
-            RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
-            open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
+    else:
+        RESOLVCONF_DATA = open('/etc/resolv.conf', 'r').read()
 
-        resolv_script = f"""#!/usr/bin/env sh
-rm /etc/resolv.conf || true;
+    if '#@docker-dns' not in RESOLVCONF_DATA:
+        RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
+
+    resolv_script = f"""#!/usr/bin/env sh
+cp /etc/resolv.conf /tmp/resolv.ddns
+rm /etc/resolv.conf > /dev/null || true;
 cat <<EOL > /etc/resolv.conf
 {RESOLVCONF_HEADER}
 EOL
 
 if [ -f "{RESOLVCONF}" ]; then
     cat {RESOLVCONF} >> /etc/resolv.conf
+else
+    cat /tmp/resolv.ddns >> /etc/resolv.conf
 fi
+rm /tmp/resolv.ddns
 
-TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
-if [ "$TUNNEL_RUNNING" -eq 1 ]; then
-{config.BASE_PATH}/bin/docker-dns tunnel &
-fi
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns tunnel
 """
-        open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
-             'w').write(resolv_script)
-        os.chmod(f'{config.BASE_PATH}/bin/docker-dns.service.sh', 0o744)
+    RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
+    open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
+
+    open(f'{config.BASE_PATH}/bin/docker-dns.service.sh',
+         'w').write(resolv_script)
+    os.chmod(f'{config.BASE_PATH}/bin/docker-dns.service.sh', 0o744)
 
 #        service_script = f"""[Unit]
 # After=network.service
@@ -65,25 +72,24 @@ fi
 #        os.system('sudo systemctl daemon-reload > /dev/null')
 #        os.system('sudo systemctl enable docker-dns.service > /dev/null')
 
-        # Gotta find a better way to start that service, as real services does not work on WSL2 as you have microsoft's init.
-        bashrc_content = open(f'{config.HOME}/.bashrc', 'r').read()
-        if 'TUNNEL_RUNNING' not in bashrc_content:
-            service_script = f"""
+    # Gotta find a better way to start that service, as real services does not work on WSL2 as you have microsoft's init.
+    bashrc_content = open(f'{config.HOME}/.bashrc', 'r').read()
+    if 'TUNNEL_RUNNING' in bashrc_content:
+        bashrc_content_pre = bashrc_content.split('# docker-dns "service"')[0]
+        bashrc_content_pos = bashrc_content.split('# docker-dns end')
+        if len(bashrc_content_pos) == 1:
+            bashrc_content_pos = bashrc_content_pos[0]
+        else:
+            bashrc_content_pos = bashrc_content_pos[1]
+        bashrc_content = f'{bashrc_content_pre}{bashrc_content_pos}'
+
+    service_script = f"""
 # docker-dns "service"  for windows wsl2
-TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
-if [ "$TUNNEL_RUNNING" -eq 1 ]; then
-    {config.BASE_PATH}/bin/docker-dns.service.sh
-fi
-
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh
+# docker-dns end
 """
-            bashrc_content = f"{bashrc_content}\n{service_script}"
-            open(f'{config.HOME}/.bashrc', 'w').write(bashrc_content)
-
-    else:
-        RESOLVCONF_DATA = open('/etc/resolv.conf', 'r').read()
-
-        RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
-        open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
+    bashrc_content = f"{bashrc_content}\n{service_script}"
+    open(f'{config.HOME}/.bashrc', 'w').write(bashrc_content)
 
 
 def __get_windows_username():
