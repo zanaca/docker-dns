@@ -36,19 +36,20 @@ def __generate_resolveconf():
         RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
 
     resolv_script = f"""#!/usr/bin/env sh
-rm /etc/resolv.conf || true;
+cp /etc/resolv.conf /tmp/resolv.ddns
+rm /etc/resolv.conf > /dev/null || true;
 cat <<EOL > /etc/resolv.conf
 {RESOLVCONF_HEADER}
 EOL
 
 if [ -f "{RESOLVCONF}" ]; then
     cat {RESOLVCONF} >> /etc/resolv.conf
+else
+    cat /tmp/resolv.ddns >> /etc/resolv.conf
 fi
+rm /tmp/resolv.ddns
 
-TUNNEL_RUNNING=$(ps a | grep tunnel | wc -1)
-if [ "$TUNNEL_RUNNING" -eq 1 ]; then
-{config.BASE_PATH}/bin/docker-dns tunnel &
-fi
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns.service.sh
 """
     RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
     open('/etc/resolv.conf', 'w').write(RESOLVCONF_DATA)
