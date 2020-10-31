@@ -29,7 +29,7 @@ if util.on_macos:
     VERSION_MAJOR_ID = '.'.join(platform.mac_ver()[0].split('.')[0:2])
     version = platform.mac_ver()[0].split('.')
     OS_VERSION = int(version[1]) + int(version[0]) * 1000
-elif util.on_windows:
+elif util.on_windows or util.on_wsl:
     POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
     VERSION_MAJOR_ID = os.popen(
         f"{POWERSHELL_PATH} [Environment]::OSVersion.Version.Major").read().split('\n')[0]
