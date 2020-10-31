@@ -41,7 +41,7 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns
 
 -   The script will place docker-dns inside `/usr/local/docker-dns`
 
-Or if you preffer, you can simple checkout the code in any folder of your choice and:
+Or you can checkout the code in any folder of your choice and:
 
 -   Install all python dependencies by running `pip3 install -r requirements.txt`
 -   Execute ./bin/docker-dns install
