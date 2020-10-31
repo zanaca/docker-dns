@@ -20,7 +20,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 
 -   Docker 19.03.13
 -   Ubuntu: 20.04
--   macOS: Catalina
+-   macOS: Catalina, Big Sur
 -   Windows: 10 (WSL2 - Ubuntu)
 
 You can see a list of older OSes on version [1.x](https://www.github.com/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
@@ -35,7 +35,9 @@ At that stage you will be accessing hostnames only inside WSL environment. You w
 
 For an simple installation process, paste the command in a macOS Terminal, Linux or WSL shell prompt.
 
-`$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
+```
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
+```
 
 -   The script will place docker-dns inside `/usr/local/docker-dns`
 
