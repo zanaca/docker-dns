@@ -1,15 +1,15 @@
-{ 
-  "macos": 
+{
+  "macos":
     {
     "min": "10.15",
-    "max": "10.15"
+    "max": "10.16"
     },
 
   "windows.wsl2":
     {
     "min": "10",
     "max": "10"
-    }, 
+    },
 
   "ubuntu":
    {

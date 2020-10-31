@@ -77,7 +77,7 @@ def run():
             super_check()
             output = install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
             if output == 0:
-                print(f'Now you can run {sys.argv[0]} status to verify')
+                print(f'Now you can run "{sys.argv[0]} status" to verify')
             run_status = output
 
         elif opt.COMMAND == 'uninstall':
