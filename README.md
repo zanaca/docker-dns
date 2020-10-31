@@ -36,7 +36,7 @@ At that stage you will be accessing hostnames only inside WSL environment. You w
 For an simple installation process, paste the command in a macOS Terminal, Linux or WSL shell prompt.
 
 ```
-$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"
 ```
 
 -   The script will place docker-dns inside `/usr/local/docker-dns`
