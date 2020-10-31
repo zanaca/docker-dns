@@ -92,7 +92,7 @@ rm /tmp/resolv.ddns
     bashrc_content = f"{bashrc_content}{service_script}"
     open(f'{config.HOME}/.bashrc', 'w').write(bashrc_content)
     os.system(
-        f"echo '%sudo   ALL=(ALL) NOPASSWD: {config.BASE_PATH}/bin/docker-dns.service.sh' > /etc/sudoers.d/99-dockerdns.conf")
+        f"echo '%sudo   ALL=(ALL) NOPASSWD: {config.BASE_PATH}/bin/docker-dns.service.sh' > /etc/sudoers.d/99-dockerdns")
 
 
 def __get_windows_username():
