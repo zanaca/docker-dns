@@ -36,7 +36,7 @@ def __generate_resolveconf():
         RESOLVCONF_DATA = f"{RESOLVCONF_HEADER}\n{RESOLVCONF_DATA}"
 
     resolv_script = f"""#!/usr/bin/env sh
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns tunnel
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && {config.BASE_PATH}/bin/docker-dns tunnel &
 
 if `grep -q \@docker-dns /etc/resolv.conf`; then
     exit 0
@@ -86,7 +86,7 @@ rm /tmp/resolv.ddns
         bashrc_content = f'{bashrc_content_pre}{bashrc_content_pos}'
 
     service_script = f"""# docker-dns "service"  for windows wsl2
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh 
 # docker-dns end
 """
     bashrc_content = f"{bashrc_content}{service_script}"
