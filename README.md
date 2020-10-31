@@ -76,7 +76,7 @@ Will create a docker image name _dns_ and it will be available as _dns.docker.de
 
 ## Troubleshooting
 
-If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
+If you are using macOS or Windows, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
 
 ## License
 
