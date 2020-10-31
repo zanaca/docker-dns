@@ -12,7 +12,7 @@ DDNS_TAG=${DDNS_NAME}
 DDNS_TLD=docker
 
 REPOSITORY="https://github.com/zanaca/docker-dns"
-PARENT_FOLDER=${1-/usr/local}
+PARENT_FOLDER=/usr/local
 DESTINATION=${PARENT_FOLDER}/docker-dns
 
 can_sudo() {
