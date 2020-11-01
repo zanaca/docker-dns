@@ -7,9 +7,7 @@ import dockerapi as docker
 import util
 import network
 
-
-PWD = os.path.abspath(os.path.dirname(
-    os.path.dirname(os.path.dirname(__file__))))
+FLAVOR = 'macos'
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
@@ -23,7 +21,7 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
          'w').write(f'nameserver {docker.NETWORK_GATEWAY}')
 
     plist = open('src/templates/com.zanaca.dockerdns-tunnel.plist',
-                 'r').read().replace('{PWD}', PWD)
+                 'r').read().replace('{PWD}', config.BASE_PATH)
     open(PLIST_PATH, 'w').write(plist)
     os.system(f'sudo launchctl load -w {PLIST_PATH} 1>/dev/null 2>/dev/null')
 
@@ -61,7 +59,7 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
         util.change_owner_recursive(APP_DESTINATION, uid, gid)
     workflow = open(f'{APP_DESTINATION}/Contents/document.wflow', 'r').read()
     workflow = workflow.replace(
-        '[PATH]', PWD)
+        '[PATH]', config.BASE_PATH)
     open(f'{APP_DESTINATION}/Contents/document.wflow', 'w').write(workflow)
 
     return True

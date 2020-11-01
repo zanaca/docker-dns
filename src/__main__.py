@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import os
 from argparse import ArgumentParser, Action, ArgumentTypeError as Fatal
@@ -70,28 +68,29 @@ def run():
         return 1
 
     opt = parser.parse_args()
-
+    run_status = 0
     try:
         if opt.COMMAND == 'show-domain':
-            show_domain.main()
+            run_status = show_domain.main()
 
         elif opt.COMMAND == 'install':
             super_check()
             output = install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
-            if output == 1:
-                print(f'Now you can run {sys.argv[0]} status to verify')
+            if output == 0:
+                print(f'Now you can run "{sys.argv[0]} status" to verify')
+            run_status = output
 
         elif opt.COMMAND == 'uninstall':
             super_check()
-            uninstall.main()
+            run_status = uninstall.main()
 
         elif opt.COMMAND == 'tunnel':
             super_check()
-            tunnel.connect()
+            run_status = tunnel.connect()
 
         else:
-            status.main()
-        return 0
+            run_status = status.main()
+        return run_status
 
     except Fatal as e:
         print(f'fatal: {e}')
@@ -99,7 +98,3 @@ def run():
     except KeyboardInterrupt:
         print('Keyboard interrupt: exiting.')
         return 1
-
-
-if __name__ == '__main__':
-    sys.exit(run())

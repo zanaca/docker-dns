@@ -3,6 +3,7 @@ import os
 from OpenSSL import crypto, SSL
 import shutil
 
+import config
 
 on_macos = platform.uname().system.lower() == 'darwin'
 on_windows = platform.uname().system.lower() == 'windows'
@@ -14,32 +15,60 @@ def is_supported():
     return not on_windows
 
 
+def is_os_supported(os=None):
+    if not os or os not in config.SUPPORTED_OSES:
+        return False
+
+    os_data = config.SUPPORTED_OSES[os]
+    min = os_data['min']
+    max = os_data['max']
+    if '.' not in min:
+        min += '.0'
+    if '.' not in max:
+        max += '.0'
+    min = min.split('.')
+    max = max.split('.')
+
+    # if os in ['macos', 'ubuntu']:
+    min = int(min[1]) + int(min[0]) * 1000
+    max = int(max[1]) + int(max[0]) * 1000
+
+    if min > config.OS_VERSION:
+        print('WARNING: Your OS version is not supported.')
+        return False
+
+    if max < config.OS_VERSION:
+        print('WARNING: Your OS is newer than the last tested version.')
+
+    return True
+
+
 def is_tunnel_needed():
     return on_macos or on_wsl
 
 
 def create_cache_folder():
-    if not os.path.exists('.cache'):
-        os.mkdir('.cache')
+    if not os.path.exists(f'{config.BASE_PATH}/.cache'):
+        os.mkdir(f'{config.BASE_PATH}/.cache')
 
-    if not os.path.isdir('.cache'):
-        os.unlink('.cache')
-        os.mkdir('.cache')
+    if not os.path.isdir(f'{config.BASE_PATH}/.cache'):
+        os.unlink(f'{config.BASE_PATH}/.cache')
+        os.mkdir(f'{config.BASE_PATH}/.cache')
 
 
 def read_cache(item):
     create_cache_folder()
 
-    if not os.path.exists(f'.cache/{item}'):
+    if not os.path.exists(f'{config.BASE_PATH}/.cache/{item}'):
         return None
 
-    return open(f'.cache/{item}', 'r').read()
+    return open(f'{config.BASE_PATH}/.cache/{item}', 'r').read()
 
 
 def write_cache(item, value):
     create_cache_folder()
 
-    return open(f'.cache/{item}', 'w').write(value)
+    return open(f'{config.BASE_PATH}/.cache/{item}', 'w').write(value)
 
 
 def is_super_user():
@@ -78,7 +107,7 @@ def generate_certificate(
 
 
 def check_if_installed():
-    return os.path.exists('.cache/INSTALLED')
+    return os.path.exists(f'{config.BASE_PATH}/.cache/INSTALLED')
 
 
 def remove_dir(base_path):

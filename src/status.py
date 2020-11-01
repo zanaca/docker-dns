@@ -24,3 +24,4 @@ def main():
 - Is tunnel running: {YES if is_tunnel_up else NO}
 - Domain "{config.TOP_LEVEL_DOMAIN}" is working: {YES if is_working else NO}
 """)
+    return 0

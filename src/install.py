@@ -14,13 +14,13 @@ if util.on_macos:
     import OSes.macos as OS
 
 elif util.on_wsl:
-    import OSes.wsl as OS
+    import OSes.windows_wsl2 as OS
 
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.ubuntu as OS
-    else:
-        import OSes.debian as OS
+    # else:
+    #    import OSes.debian as OS
 
 RESOLVCONF = '/etc/resolv.conf'
 
@@ -32,24 +32,28 @@ def update_cache():
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
+    if not util.is_os_supported(OS.FLAVOR):
+        return 1
+
     if os.path.exists('.cache/INSTALLED'):
         os.unlink('.cache/INSTALLED')
 
     # update resolv.conf
-    if not os.path.exists(RESOLVCONF):
-        open(RESOLVCONF, 'w').write('1.1.1.1')
+    if not hasattr(OS, 'DISABLE_MAIN_RESOLVCONF_ROUTINE'):
+        if not os.path.exists(RESOLVCONF):
+            open(RESOLVCONF, 'w').write('nameserver 1.1.1.1')
 
-    dns = docker.NETWORK_GATEWAY
-    try:
-        dns = OS.DNS
-    except:
-        # no DNS
-        pass
+        dns = docker.NETWORK_GATEWAY
+        try:
+            dns = OS.DNS
+        except:
+            # no DNS
+            pass
 
-    RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
-    if '#@docker-dns' not in RESOLVCONF_DATA:
-        RESOLVCONF_DATA = f"options timeout:1 #@docker-dns\nnameserver {dns} #@docker-dns\n{RESOLVCONF_DATA}"
-        open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
+        RESOLVCONF_DATA = open(RESOLVCONF, 'r').read()
+        if '#@docker-dns' not in RESOLVCONF_DATA:
+            RESOLVCONF_DATA = f"options timeout:1 #@docker-dns\nnameserver {dns} #@docker-dns\n{RESOLVCONF_DATA}"
+            open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
 
     os_config = OS.setup(tld)
 
@@ -103,4 +107,4 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         os.system(' '.join(original_arg))
 
     open('.cache/INSTALLED', 'w').write('')
-    return True
+    return 0

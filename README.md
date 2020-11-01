@@ -4,7 +4,7 @@ Docker DNS creates a container that works as a DNS for docker containers in you 
 
 It was created to allow you to work in a container as if was a "real" server setup. You will have access to all ports/services inside the container without need to expose all the ports. You can publish ports as well to access it like the old way. E.g.: 127.0.0.1:8080 -> container_ip:80
 
-It was tested on linux and macOS Catalina. macOS environment has a downside that you will always run the `./docker-dns tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity or you can run the application 'dockerdns-tunnel', available on `~/Applications`.
+It was tested on linux and macOS Catalina. macOS environment has a downside that you will always run the `./bin/docker-dns tunnel` every time you boot the host machine. An service will be installed and loaded on every boot to handle that necessity or you can run the application 'dockerdns-tunnel', available on `~/Applications`.
 
 The main usage is for development environment only, should not be used in production environment.
 
@@ -15,35 +15,36 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 -   [Docker](https://www.docker.com/products/docker-desktop)
 -   Python3
 -   pip
--   WSL2, on Windows
 
 ## Tested enviroment
 
 -   Docker 19.03.13
 -   Ubuntu: 20.04
--   macOS: Catalina
--   Windows: 10
+-   macOS: Catalina, Big Sur
+-   Windows: 10 (WSL2 - Ubuntu)
 
 You can see a list of older OSes on version [1.x](https://www.github.com/zanaca/docker-dns/blob/version/1.x/README.md#tested-enviroment)
 
-On Windows you don't have to install Docker from WSL2 linux, you should work with Docker for windows and enable WSL2 integration.
+On Windows you don't have to install Docker inside WSL2 linux, you should work with Docker for windows and enable WSL2 integration.
 
 #### \* Windows reminder
 
-At that stage you wil accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example, **but not** from your browser. A solution is being designed and it is working on tests.
+At that stage you will be accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example **but not** from your Edge browser window. A solution is being designed.
 
 ## Install
 
 For an simple installation process, paste the command in a macOS Terminal, Linux or WSL shell prompt.
 
-`$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"`
+```
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns/install/run.sh)"
+```
 
 -   The script will place docker-dns inside `/usr/local/docker-dns`
 
-Or if you preffer, you can simple checkout the code in any folder of your choice and:
+Or you can checkout the code in any folder of your choice and:
 
 -   Install all python dependencies by running `pip3 install -r requirements.txt`
--   Execute ./docker-dns install
+-   Execute ./bin/docker-dns install
 
 ## Supported commands
 
@@ -57,7 +58,7 @@ Or if you preffer, you can simple checkout the code in any folder of your choice
 
 -   `status` - Show the current status for your machine.
 
-You can see the list of all available commands and options running `./docker-dns -h`
+You can see the list of all available commands and options running `./bin/docker-dns -h`
 
 ## Options
 
@@ -70,12 +71,12 @@ On `install` command you can pass some variables to change how setup is done. Yo
 -   _name_: Running container name. Default value: the _tag_ value.
 
 Example:
-`./docker-dns install tld=docker.dev tag=dns`
+`./bin/docker-dns install tld=docker.dev tag=dns`
 Will create a docker image name _dns_ and it will be available as _dns.docker.dev_ so you could run `dig www.google.com @dns.docker.dev`
 
 ## Troubleshooting
 
-If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./docker-dns tunnel` from docker-dns folder
+If you are using macOS or Windows, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
 
 ## License
 

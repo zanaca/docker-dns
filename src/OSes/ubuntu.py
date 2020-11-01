@@ -6,6 +6,7 @@ import util
 import network
 import tunnel
 
+FLAVOR = 'ubuntu'
 DOCKER_CONF_FOLDER = '/etc/docker'
 DNSMASQ_LOCAL_CONF = '/etc/NetworkManager/dnsmasq.d/01_docker'
 
