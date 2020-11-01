@@ -10,11 +10,12 @@ The main usage is for development environment only, should not be used in produc
 
 By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNAME.docker_.
 
-## Requirements
+## Requirements for host machine
 
 -   [Docker](https://www.docker.com/products/docker-desktop)
 -   Python3
 -   pip
+-   OpenSSH
 
 ## Tested enviroment
 
