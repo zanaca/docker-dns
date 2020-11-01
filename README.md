@@ -41,7 +41,7 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns
 
 -   The script will place docker-dns inside `/usr/local/docker-dns`
 
-Or if you preffer, you can simple checkout the code in any folder of your choice and:
+Or you can checkout the code in any folder of your choice and:
 
 -   Install all python dependencies by running `pip3 install -r requirements.txt`
 -   Execute ./bin/docker-dns install
@@ -76,7 +76,7 @@ Will create a docker image name _dns_ and it will be available as _dns.docker.de
 
 ## Troubleshooting
 
-If you are using macOS, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
+If you are using macOS or Windows, on restart, you can will loose access to your containers DNS. You need to recreate a tunnel to route all traffic to docker network through it on every boot. Just execute `sudo ./bin/docker-dns tunnel` from docker-dns folder
 
 ## License
 
