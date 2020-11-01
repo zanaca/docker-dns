@@ -86,7 +86,7 @@ rm /tmp/resolv.ddns
         bashrc_content = f'{bashrc_content_pre}{bashrc_content_pos}'
 
     service_script = f"""# docker-dns "service"  for windows wsl2
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh 
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh
 # docker-dns end
 """
     bashrc_content = f"{bashrc_content}{service_script}"
@@ -103,6 +103,7 @@ def __get_windows_username():
 def __generate_powershellbat(tld=None):
     if not tld:
         return False
+    return False
 
     script = f"""
 To finish docker-dns installation please run the commands below on PowerShell as ADMINISTRATOR
