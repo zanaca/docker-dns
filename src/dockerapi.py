@@ -85,7 +85,7 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
         port_bindings={
             '53/udp': port_53,
             53: port_53,
-            '11194/udp': '11194/udp'
+            '1194/udp': '11194/udp'
         },
         publish_all_ports=True,
         binds=['/var/run/docker.sock:/var/run/docker.sock'],

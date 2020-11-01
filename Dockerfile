@@ -15,9 +15,9 @@ FROM alpine:latest AS base_oses
     RUN wget -qO- https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz | tar xvz -C /usr/local/bin
     ADD src/templates/dnsmasq.tpl /root/dnsmasq.tpl
     ADD Dockerfile_entrypoint.sh /root/entrypoint.sh
-    ADD Dockerfile_id_rsa.pub /root/.ssh/authorized_keys
-    RUN /bin/chmod 700 /root/.ssh; \
-        /bin/chmod 600 /root/.ssh/authorized_keys
+    #ADD Dockerfile_id_rsa.pub /root/.ssh/authorized_keys
+    #RUN /bin/chmod 700 /root/.ssh; \
+    #    /bin/chmod 600 /root/.ssh/authorized_keys
     ENTRYPOINT ["/root/entrypoint.sh"]
 
     RUN /bin/sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config; \
@@ -25,6 +25,7 @@ FROM alpine:latest AS base_oses
         /bin/sed -i s/#PermitEmptyPasswords.*/PermitEmptyPasswords\ yes/ /etc/ssh/sshd_config; \
         /bin/sed -i s/#PermitTunnel.*/PermitTunnel\ yes/ /etc/ssh/sshd_config; \
         /bin/sed -i s/#UseDNS.*/UseDNS\ no/ /etc/ssh/sshd_config; \
+        /bin/sed -i s/AllowTcpForwarding\ no/AllowTcpForwarding\ yes/ /etc/ssh/sshd_config; \
         /bin/sed -i s/#ChallengeResponseAuthentication.*/ChallengeResponseAuthentication\ no/ /etc/ssh/sshd_config; \
         ssh-keygen -A
 
@@ -33,7 +34,7 @@ FROM alpine:latest AS base_oses
         echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
 
 FROM base_oses AS windows
-    EXPOSE 11194/udp
+    EXPOSE 1194/udp
     ENV OPENVPN_EXISTS=1
 
     RUN apk add --no-cache openvpn git openssl iptables && \

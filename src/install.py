@@ -93,8 +93,8 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     #     json.dump(dnsmasq_local, open(OS.DNSMASQ_LOCAL_CONF, 'w'))
 
     # TLD domain ceriticate
-    cert_file = f'conf/certs.d/{tld}.cert'
-    key_file = f'conf/certs.d/{tld}.key'
+    cert_file = f'certs.d/{tld}.cert'
+    key_file = f'certs.d/{tld}.key'
     util.generate_certificate(tld, cert_file=cert_file, key_file=key_file)
     shutil.copy2(cert_file, OS.DOCKER_CONF_FOLDER)
     shutil.copy2(key_file, OS.DOCKER_CONF_FOLDER)
