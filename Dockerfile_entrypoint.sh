@@ -17,7 +17,7 @@ if [ ! -z ${OPENVPN_EXISTS+x} ]; then
         mknod /dev/net/tun c 10 200
     fi
 
-    /usr/sbin/openvpn --config /etc/openvpn/openvpn.conf
+    /usr/sbin/openvpn --config /etc/openvpn/openvpn.conf &
 
 
     iptables -I INPUT -p udp --dport 1194 -j ACCEPT
