@@ -17,8 +17,9 @@ DNS = '127.0.0.1'
 DISABLE_MAIN_RESOLVCONF_ROUTINE = True
 RESOLVCONF = '/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
-NOTEPAD_PATH = '/mnt/c/Windows/System32/notepad.exe'
-POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
+OPENVPN_PATH = '/mnt/c/Program\ Files/OpenVPN/bin/openvpn-gui.exe'
+#POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
+DOCKER_BUILD_TARGET = 'windows'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
     DNSMASQ_LOCAL_CONF = DNSMASQ_LOCAL_CONF.replace('dnsmasq.d', 'conf.d')
@@ -86,7 +87,7 @@ rm /tmp/resolv.ddns
         bashrc_content = f'{bashrc_content_pre}{bashrc_content_pos}'
 
     service_script = f"""# docker-dns "service"  for windows wsl2
-[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh 
+[ "$(ps a | grep tunnel | wc -l)" -le 1 ] && sudo {config.BASE_PATH}/bin/docker-dns.service.sh
 # docker-dns end
 """
     bashrc_content = f"{bashrc_content}{service_script}"
@@ -124,6 +125,12 @@ Get-DnsClientNrptRule | Where {{$_.Namespace -eq ".docker"}} | Remove-DnsClientN
         f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
     os.system(
         f'{NOTEPAD_PATH} C:\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
+
+
+def __load_openvpn_conf():
+
+    conf_file = f'{config.BASE_PATH}/client.ovpn'
+    os.system(f'{OPENVPN_PATH} --connect "{conf_file}"')
 
 
 def setup(tld=config.TOP_LEVEL_DOMAIN):
@@ -181,7 +188,7 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     # Running the powershell bat script makes the resolvconf generation OBSOLETE
     __generate_resolveconf()
 
-    __generate_powershellbat(tld=tld)
+    __load_openvpn_conf()
 
     # create etc/resolv.conf for
     return True
@@ -204,7 +211,7 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         print('Removing kwown_hosts backup')
         os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
-    WINDOWS_USER = __get_windows_username()
-    if os.path.exists(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat'):
-        print('Removing bat file from Windows Desktop')
-        os.unlink(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat')
+    #WINDOWS_USER = __get_windows_username()
+    #if os.path.exists(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat'):
+    #    print('Removing bat file from Windows Desktop')
+    #    os.unlink(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat')

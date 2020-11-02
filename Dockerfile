@@ -1,4 +1,4 @@
-FROM alpine:latest AS base_oses
+FROM alpine:latest AS base
     LABEL maintainer="carlos@zanaca.com"
 
     VOLUME /var/run
@@ -15,9 +15,7 @@ FROM alpine:latest AS base_oses
     RUN wget -qO- https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz | tar xvz -C /usr/local/bin
     ADD src/templates/dnsmasq.tpl /root/dnsmasq.tpl
     ADD Dockerfile_entrypoint.sh /root/entrypoint.sh
-    #ADD Dockerfile_id_rsa.pub /root/.ssh/authorized_keys
-    #RUN /bin/chmod 700 /root/.ssh; \
-    #    /bin/chmod 600 /root/.ssh/authorized_keys
+
     ENTRYPOINT ["/root/entrypoint.sh"]
 
     RUN /bin/sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config; \
@@ -33,9 +31,9 @@ FROM alpine:latest AS base_oses
     RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf; \
         echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
 
-FROM base_oses AS windows
+FROM base AS windows
     EXPOSE 1194/udp
-    ENV OPENVPN_EXISTS=1
+    ENV OPENVPN_EXISTS 1
 
     RUN apk add --no-cache openvpn git openssl iptables && \
     # Get easy-rsa

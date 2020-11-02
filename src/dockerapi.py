@@ -1,4 +1,3 @@
-from Crypto.PublicKey import RSA
 import os
 
 import docker
@@ -6,8 +5,6 @@ import util
 import config
 
 errors = docker.errors
-
-RSA_KEY = 'Dockerfile_id_rsa'
 
 client = docker.from_env()
 
@@ -51,22 +48,8 @@ def get_ip(name=config.DOCKER_CONTAINER_NAME):
     return client.containers.get(name).attrs['NetworkSettings']['IPAddress']
 
 
-def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN, bind_port_ip=False):
-    if not os.path.exists(RSA_KEY):
-        print('- Creating RSA key...')
-        key = RSA.generate(2048)
-        with open(RSA_KEY, 'wb') as content_file:
-            os.chmod(RSA_KEY, 600)
-            content_file.write(key.exportKey('PEM'))
-        pubkey = key.publickey()
-        with open(f'{RSA_KEY}.pub', 'wb') as content_file:
-            content_file.write(pubkey.exportKey('OpenSSH'))
-
+def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN, bind_port_ip=False, target='base'):
     print('- Building...')
-    target = 'base_oses'
-    # if util.on_wsl or util.on_windows:
-    #    target = 'windows'
-
     docker_output = client.images.build(
         path='.', target=target, tag=f'{tag}:latest', nocache=False)
 
@@ -90,6 +73,9 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
         publish_all_ports=True,
         binds=['/var/run/docker.sock:/var/run/docker.sock'],
     )
+
+    if target == 'windows':
+        host_config['cap_add'] = ['NET_ADMIN']
 
     docker_output = client.api.create_container(tag,
                                                 name=name,

@@ -1,4 +1,3 @@
-Dockerfile_id_rsa*
-certs.d/gen/*
+certs.d/tld/*
 .cache
 __pycache__
