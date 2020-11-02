@@ -17,8 +17,8 @@ DNS = '127.0.0.1'
 DISABLE_MAIN_RESOLVCONF_ROUTINE = True
 RESOLVCONF = '/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
-OPENVPN_PATH = '/mnt/c/Program\ Files/OpenVPN/bin/openvpn-gui.exe'
-#POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
+OPENVPN_CONF_PATH = 'C:\\\\Users\\\\[WINDOWS_USER]\\\\docker-dns.ovpn'
+POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
 DOCKER_BUILD_TARGET = 'windows'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
@@ -124,13 +124,15 @@ Get-DnsClientNrptRule | Where {{$_.Namespace -eq ".docker"}} | Remove-DnsClientN
     open(
         f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
     os.system(
-        f'{NOTEPAD_PATH} C:\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
+        f'{NOTEPAD_PATH} {')
 
 
 def __load_openvpn_conf():
+    WINDOWS_USER = __get_windows_username()
+    shutil.copy2('src/templates/client.ovpn', f'/mnt/c/Users/{WINDOWS_USER}/docker-dns.ovpn')
 
-    conf_file = f'{config.BASE_PATH}/client.ovpn'
-    os.system(f'{OPENVPN_PATH} --connect "{conf_file}"')
+    host_conf_file = OPENVPN_CONF_PATH.replace('[WINDOWS_USER]', WINDOWS_USER)
+    os.system(f'explorer.exe "{host_conf_file}"')
 
 
 def setup(tld=config.TOP_LEVEL_DOMAIN):
