@@ -76,6 +76,7 @@ def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAIN
 
     if target == 'windows':
         host_config['cap_add'] = ['NET_ADMIN']
+        host_config['privileged'] = True
 
     docker_output = client.api.create_container(tag,
                                                 name=name,
