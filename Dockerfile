@@ -15,7 +15,6 @@ FROM alpine:latest AS base
     RUN wget -qO- https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz | tar xvz -C /usr/local/bin
     ADD src/templates/dnsmasq.tpl /root/dnsmasq.tpl
     ADD Dockerfile_entrypoint.sh /root/entrypoint.sh
-
     ENTRYPOINT ["/root/entrypoint.sh"]
 
     RUN /bin/sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config; \
@@ -44,9 +43,6 @@ FROM base AS windows
         rm -rf /tmp/easy-rsa/.git && cp -a /tmp/easy-rsa /usr/local/share/ && \
         rm -rf /tmp/easy-rsa/ && \
         ln -s /usr/local/share/easy-rsa/easyrsa3/easyrsa /usr/local/bin
-
-    #RUN modprobe tun
-    #    echo "tun" >> /etc/modules-load.d/tun.conf
 
     ADD /tmp/openvpn.conf /etc/openvpn/openvpn.conf
     RUN mkdir /etc/openvpn/certs.d

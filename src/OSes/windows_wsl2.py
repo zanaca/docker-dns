@@ -102,8 +102,6 @@ def __get_windows_username():
         f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
-
-
 def __load_openvpn_conf():
     WINDOWS_USER = __get_windows_username()
     shutil.copy2('src/templates/client.ovpn', f'/mnt/c/Users/{WINDOWS_USER}/docker-dns.ovpn')
