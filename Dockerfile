@@ -48,7 +48,7 @@ FROM base AS windows
     #RUN modprobe tun
     #    echo "tun" >> /etc/modules-load.d/tun.conf
 
-    ADD src/templates/openvpn.conf /etc/openvpn/openvpn.conf
+    ADD /tmp/openvpn.conf /etc/openvpn/openvpn.conf
     RUN mkdir /etc/openvpn/certs.d
     ADD certs.d/ovpn/* /etc/openvpn/certs.d/
     RUN chmod 600 /etc/openvpn/certs.d/*.key

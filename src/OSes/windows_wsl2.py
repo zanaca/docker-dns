@@ -18,6 +18,7 @@ DISABLE_MAIN_RESOLVCONF_ROUTINE = True
 RESOLVCONF = '/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
 OPENVPN_CONF_PATH = 'C:\\\\Users\\\\[WINDOWS_USER]\\\\docker-dns.ovpn'
+EXPLORER_EXECUTABLE = '/mnt/c/windows/explorer.exe'
 POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
 DOCKER_BUILD_TARGET = 'windows'
 
@@ -101,30 +102,6 @@ def __get_windows_username():
         f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
-def __generate_powershellbat(tld=None):
-    if not tld:
-        return False
-
-    script = f"""
-To finish docker-dns installation please run the commands below on PowerShell as ADMINISTRATOR
-to enable domain resolution for the top level domain "{tld}"
-
-Commands:
-Add-DnsClientNrptRule -Namespace ".{tld}" -Comment "docker-dns" -DnsSecEnable  -NameServers "127.0.0.1"
-
-
-
-To uninstall docker-dns from windows please run the commands below on PowerShell as ADMINISTRATOR
-
-Commands:
-Get-DnsClientNrptRule | Where {{$_.Namespace -eq ".docker"}} | Remove-DnsClientNrptRule -PassThru -Force
-"""
-
-    WINDOWS_USER = __get_windows_username()
-    open(
-        f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
-    os.system(
-        f'{NOTEPAD_PATH} {')
 
 
 def __load_openvpn_conf():
@@ -132,7 +109,7 @@ def __load_openvpn_conf():
     shutil.copy2('src/templates/client.ovpn', f'/mnt/c/Users/{WINDOWS_USER}/docker-dns.ovpn')
 
     host_conf_file = OPENVPN_CONF_PATH.replace('[WINDOWS_USER]', WINDOWS_USER)
-    os.system(f'explorer.exe "{host_conf_file}"')
+    os.system(f'{EXPLORER_EXECUTABLE} "{host_conf_file}"')
 
 
 def setup(tld=config.TOP_LEVEL_DOMAIN):
@@ -140,6 +117,11 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
         os.mkdir('/etc/resolver')
     open(f'/etc/resolver/{tld}',
          'w').write(f'nameserver 127.0.0.1')
+
+    ovpn_conf = open('src/templates/openvpn.conf', 'r').read()
+    ovpn_conf = ovpn_conf.replace('[TOP_LEVEL_DOMAIN]', tld)
+
+    open('/tmp/openvpn.conf', 'w').write(ovpn_conf)
 
     # DO NOT DISABLE WSL RESOLV.CONF GENARATION!!! IT WILL BREAK LINUX FOR NOW
     #
