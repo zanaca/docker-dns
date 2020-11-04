@@ -15,4 +15,5 @@ export HOST_IP=`cat /etc/resolv.conf  | grep ^nameserver | cut -d\  -f2 | head -
 
 docker-gen -only-exposed /root/dnsmasq.tpl /etc/dnsmasq.conf
 dnsmasq
-docker-gen -watch -only-exposed -notify "/root/dnsmasq-restart.sh -u root $@" /root/dnsmasq.tpl /etc/dnsmasq.conf
+docker-gen -watch -only-exposed -notify "/root/dnsmasq-restart.sh -u root $@" /root/dnsmasq.tpl /etc/dnsmasq.conf &
+syslogd -n -O /dev/stdout

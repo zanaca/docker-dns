@@ -1,4 +1,4 @@
-FROM alpine:latest AS base_oses
+FROM alpine:latest AS base
     LABEL maintainer="carlos@zanaca.com"
 
     VOLUME /var/run
@@ -22,6 +22,7 @@ FROM alpine:latest AS base_oses
         /bin/sed -i s/#PermitEmptyPasswords.*/PermitEmptyPasswords\ yes/ /etc/ssh/sshd_config; \
         /bin/sed -i s/#PermitTunnel.*/PermitTunnel\ yes/ /etc/ssh/sshd_config; \
         /bin/sed -i s/#UseDNS.*/UseDNS\ no/ /etc/ssh/sshd_config; \
+        /bin/sed -i s/AllowTcpForwarding\ no/AllowTcpForwarding\ yes/ /etc/ssh/sshd_config; \
         /bin/sed -i s/#ChallengeResponseAuthentication.*/ChallengeResponseAuthentication\ no/ /etc/ssh/sshd_config; \
         ssh-keygen -A
 
@@ -29,7 +30,7 @@ FROM alpine:latest AS base_oses
     RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf; \
         echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
 
-FROM base_oses AS windows
+FROM base AS windows
     EXPOSE 1194/udp
 
     RUN apk add openvpn=2.4.3-r0 git openssl && \
