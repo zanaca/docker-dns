@@ -15,7 +15,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 -   [Docker](https://www.docker.com/products/docker-desktop)
 -   Python3
 -   pip
--   OpenSSH`
+-   OpenSSH
 
 ## Tested enviroment
 
