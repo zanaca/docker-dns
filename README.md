@@ -44,8 +44,8 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns
 
 Or you can checkout the code in any folder of your choice and:
 
--   Install all python dependencies by running `pip3 install -r requirements.txt`
--   Execute ./bin/docker-dns install
+-   Install all python dependencies by running `$ pip3 install -r requirements.txt`
+-   Execute `$ ./bin/docker-dns install`
 
 ## Supported commands
 
@@ -59,7 +59,7 @@ Or you can checkout the code in any folder of your choice and:
 
 -   `status` - Show the current status for your machine.
 
-You can see the list of all available commands and options running `./bin/docker-dns -h`
+You can see the list of all available commands and options running `$ ./bin/docker-dns -h`
 
 ## Options
 
@@ -72,7 +72,10 @@ On `install` command you can pass some variables to change how setup is done. Yo
 -   _name_: Running container name. Default value: the _tag_ value.
 
 Example:
-`./bin/docker-dns install tld=docker.dev tag=dns`
+```
+$ ./bin/docker-dns install tld=docker.dev tag=dns
+```
+
 Will create a docker image name _dns_ and it will be available as _dns.docker.dev_ so you could run `dig www.google.com @dns.docker.dev`
 
 ## Troubleshooting
