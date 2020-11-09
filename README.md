@@ -1,4 +1,4 @@
-# Docker DNS
+# Docker DNS for containers and host machine
 
 Docker DNS creates a container that works as a DNS for docker containers in you machine. Every running container will be accessible by `$container_name.docker` for example. You could inform you own domain if you like. Your domains are available _inside_ and _outside_ docker, but just for you machine. For example, you could access *http://nginx.docker* from your browser window OR from inside a container.
 
