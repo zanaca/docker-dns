@@ -117,10 +117,10 @@ def __generate_proxy_bat(ssh_port=None):
                 proxy_override += f'{a}.{b}.*;'
 
     script = f"""
-start /B "" ssh -N root@127.0.0.1 -p {ssh_port} -f  -D 33128
+start /B "" ssh -N root@127.0.0.1 -p {ssh_port} -f  -D 31080
 
 reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyEnable /t REG_DWORD /d 1
-reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyServer /t REG_SZ /d socks=127.0.0.1:33128
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyServer /t REG_SZ /d socks=127.0.0.1:31080
 reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyOverride /t REG_SZ /d {proxy_override}"
 """
 

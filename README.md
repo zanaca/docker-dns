@@ -15,7 +15,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 -   [Docker](https://www.docker.com/products/docker-desktop)
 -   Python3
 -   pip
--   OpenSSH
+-   OpenSSH`
 
 ## Tested enviroment
 
@@ -28,9 +28,9 @@ You can see a list of older OSes on version [1.x](https://www.github.com/zanaca/
 
 On Windows you don't have to install Docker inside WSL2 linux, you should work with Docker for windows and enable WSL2 integration.
 
-#### \* Windows reminder
+#### \* _Windows caveat_
 
-At that stage you will be accessing hostnames only inside WSL environment. You will resolve http://nginx.docker when you are **in WSL** using curl for example **but not** from your Edge browser window. A solution is being designed.
+For Windows a socks5 proxy (using ssh to container ns0) will be used to handle the address from host machine to docker network.  Only addresses from `172.16.0.0` to `172.31.255.255` will be redirect to proxy. You will not be able to run a different proxy while using `docker-dns`. The socks5 proxy address is `127.0.0.1` using port `31080`
 
 ## Install
 
