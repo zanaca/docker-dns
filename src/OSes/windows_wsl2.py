@@ -17,8 +17,9 @@ DNS = '127.0.0.1'
 DISABLE_MAIN_RESOLVCONF_ROUTINE = True
 RESOLVCONF = '/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
-NOTEPAD_PATH = '/mnt/c/Windows/System32/notepad.exe'
+CMD_PATH = '/mnt/c/Windows/System32/cmd.exe'
 POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
+STARTUP_FOLDER_PATH = '/mnt/c/ProgramData/Microsoft/Windows/Start\ Menu/Programs/StartUp'
 DOCKER_BUILD_TARGET = 'windows'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
@@ -101,31 +102,41 @@ def __get_windows_username():
         f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
-def __generate_powershellbat(tld=None):
-    if not tld:
+def __generate_proxy_bat(ssh_port=None):
+    if not ssh_port:
         return False
-    return False
+
+    proxy_override = ''
+    for a in range(1, 255):
+        if a != 172:
+            proxy_override += f'{a}.*;'
+        else:
+            for b in range(0, 15):
+                proxy_override += f'{a}.{b}.*;'
+            for b in range(32, 255):
+                proxy_override += f'{a}.{b}.*;'
 
     script = f"""
-To finish docker-dns installation please run the commands below on PowerShell as ADMINISTRATOR
-to enable domain resolution for the top level domain "{tld}"
+start /B "" ssh -N root@127.0.0.1 -p {ssh_port} -f  -D 33128
 
-Commands:
-Add-DnsClientNrptRule -Namespace ".{tld}" -Comment "docker-dns" -DnsSecEnable  -NameServers "127.0.0.1"
-
-
-
-To uninstall docker-dns from windows please run the commands below on PowerShell as ADMINISTRATOR
-
-Commands:
-Get-DnsClientNrptRule | Where {{$_.Namespace -eq ".docker"}} | Remove-DnsClientNrptRule -PassThru -Force
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyEnable /t REG_DWORD /d 1
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyServer /t REG_SZ /d socks=127.0.0.1:33128
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /f /v ProxyOverride /t REG_SZ /d {proxy_override}"
 """
 
-    WINDOWS_USER = __get_windows_username()
-    open(
-        f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.txt', 'w').write(script)
-    os.system(
-        f'{NOTEPAD_PATH} C:\\\\Users\\\\{WINDOWS_USER}\\\\Desktop\\\\docker-dns.txt  &')
+    file_name = f'{STARTUP_FOLDER_PATH}/docker-dns.bat'
+    open(file_name, 'w').write(script)
+
+    file_name = file_name.replace('/mnt/c', 'C:').replace('/', '\\\\')
+    os.system(f'{CMD_PATH} /c {file_name} &')
+
+def __get_ssh_port():
+    port = False
+    ports = docker.get_exposed_port(config.DOCKER_CONTAINER_NAME)
+    if '22/tcp' in ports:
+        port = int(ports['22/tcp'][0]['HostPort'])
+
+    return port
 
 
 def setup(tld=config.TOP_LEVEL_DOMAIN):
@@ -170,20 +181,16 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
                      f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
     time.sleep(3)
-    port = False
-    ports = docker.get_exposed_port(config.DOCKER_CONTAINER_NAME)
-    if '22/tcp' in ports:
-        port = int(ports['22/tcp'][0]['HostPort'])
+    port = __get_ssh_port()
     if not port:
         raise('Problem fetching ssh port')
 
     os.system(
         f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
 
-    # Running the powershell bat script makes the resolvconf generation OBSOLETE
     __generate_resolveconf()
 
-    __generate_powershellbat(tld=tld)
+    __generate_proxy_bat(ssh_port=port)
 
     # create etc/resolv.conf for
     return True
@@ -206,7 +213,6 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         print('Removing kwown_hosts backup')
         os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
-    WINDOWS_USER = __get_windows_username()
-    if os.path.exists(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat'):
-        print('Removing bat file from Windows Desktop')
-        os.unlink(f'/mnt/c/Users/{WINDOWS_USER}/Desktop/docker-dns.bat')
+    if os.path.exists(f'{STARTUP_FOLDER_PATH}/docker-dns.bat'):
+        print('Removing bat file from Windows Startup folder')
+        os.unlink(f'{STARTUP_FOLDER_PATH}/docker-dns.bat')
