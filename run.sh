@@ -137,7 +137,7 @@ printf "       Host machine DNS for Docker Containers"
 printf "\033[m\n\n"
 
 
-printf "Starting instalation process\n"
+printf "Starting installation process\n"
 printf "Eventually you will be asked for you password to perform \"sudo\" steps.\n\n"
 
 grab_information
