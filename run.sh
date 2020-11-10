@@ -8,7 +8,7 @@ if [[ "$(uname)" = "Linux" ]]; then
 fi
 
 DDNS_NAME=${DDNS_NAME:-ns0}
-DDNS_TAG=${DDNS_NAME:-ns0}
+DDNS_TAG=${DDNS_TAG:-$DDNS_NAME}
 DDNS_TLD=${DDNS_TLD:-docker}
 
 REPOSITORY="https://github.com/zanaca/docker-dns"
