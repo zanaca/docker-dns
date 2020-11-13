@@ -1,4 +1,4 @@
-# Docker DNS
+# Docker DNS for containers and host machine
 
 Docker DNS creates a container that works as a DNS for docker containers in you machine. Every running container will be accessible by `$container_name.docker` for example. You could inform you own domain if you like. Your domains are available _inside_ and _outside_ docker, but just for you machine. For example, you could access *http://nginx.docker* from your browser window OR from inside a container.
 
@@ -15,7 +15,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 -   [Docker](https://www.docker.com/products/docker-desktop)
 -   Python3
 -   pip
--   OpenSSH`
+-   OpenSSH
 
 ## Tested enviroment
 
@@ -44,8 +44,8 @@ $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zanaca/docker-dns
 
 Or you can checkout the code in any folder of your choice and:
 
--   Install all python dependencies by running `pip3 install -r requirements.txt`
--   Execute ./bin/docker-dns install
+-   Install all python dependencies by running `$ pip3 install -r requirements.txt`
+-   Execute `$ ./bin/docker-dns install`
 
 ## Supported commands
 
@@ -59,7 +59,7 @@ Or you can checkout the code in any folder of your choice and:
 
 -   `status` - Show the current status for your machine.
 
-You can see the list of all available commands and options running `./bin/docker-dns -h`
+You can see the list of all available commands and options running `$ ./bin/docker-dns -h`
 
 ## Options
 
@@ -72,7 +72,10 @@ On `install` command you can pass some variables to change how setup is done. Yo
 -   _name_: Running container name. Default value: the _tag_ value.
 
 Example:
-`./bin/docker-dns install tld=docker.dev tag=dns`
+```
+$ ./bin/docker-dns install tld=docker.dev tag=dns
+```
+
 Will create a docker image name _dns_ and it will be available as _dns.docker.dev_ so you could run `dig www.google.com @dns.docker.dev`
 
 ## Troubleshooting
