@@ -39,9 +39,3 @@ address=/{{ $.Env.HOSTNAME }}.{{ $tld }}/{{ $.Env.HOST_IP }}
     {{ end }}
     {{ template "host" (dict "Container" $container "Host" $container.Name "Tld" $tld) }}
 {{ end }}
-
-{{ range $host, $containers := groupByMulti $ "Env.TOP_LEVEL_DOMAIN" "," }}
-    {{ range $index, $container := $containers }}
-        {{ template "host" (dict "Container" $container "Host" (print $host) "Tld" "") }}
-    {{ end }}
-{{ end }}
