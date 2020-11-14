@@ -7,16 +7,16 @@ name ?= $(shell test -f .cache/name && cat .cache/name || echo '${tag}')
 
 install: warning
 	@sudo -H pip3 install -r requirements.txt
-	@./bin/docker-dns install -t "$(tag)" -d "$(tld)" -n "$(name)"
+	@sudo ./bin/docker-dns install -t "$(tag)" -d "$(tld)" -n "$(name)"
 
 uninstall: warning
-	@./bin/docker-dns uninstall
+	@sudo ./bin/docker-dns uninstall
 
 show-domain: warning
 	@./bin/docker-dns show-domain
 
 tunnel: warning
-	@./bin/docker-dns tunnel
+	@sudo ./bin/docker-dns tunnel
 
 warning:
 	@echo "\nWARNING: Deprecated Makefile usage, please use \"./bin/docker-dns\" command\n"
