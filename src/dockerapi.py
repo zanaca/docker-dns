@@ -48,11 +48,13 @@ def get_ip(name=config.DOCKER_CONTAINER_NAME):
     return client.containers.get(name).attrs['NetworkSettings']['IPAddress']
 
 
-def build_container(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN, bind_port_ip=False, target='base'):
+def build_container(
+        name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN,
+        bind_port_ip=False, target='base'):
     print('- Building...')
 
     docker_output = client.images.build(
-        path='.', target=target, tag=f'{tag}:latest', nocache=False)
+        path='.', target=target, tag=f'{tag}:latest', nocache=False, rm=True)
 
     for line in docker_output[1]:
         if 'stream' in line:
