@@ -20,7 +20,7 @@ RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@dock
 CMD_PATH = '/mnt/c/Windows/System32/cmd.exe'
 POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
 STARTUP_FOLDER_PATH = '/mnt/c/Users/[USERNAME]/AppData/Roaming/Microsoft/Windows/Start\ Menu/Programs/StartUp'
-DOCKER_BUILD_TARGET = 'windows'
+DOCKER_BUILD_TARGET = 'base'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
     DNSMASQ_LOCAL_CONF = DNSMASQ_LOCAL_CONF.replace('dnsmasq.d', 'conf.d')

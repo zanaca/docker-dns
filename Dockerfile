@@ -29,24 +29,3 @@ FROM alpine:latest AS base
     RUN passwd -d root
     RUN echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf; \
         echo net.ipv4.ip_forward = 1 >> /etc/sysctl.d/ipv4.conf
-
-FROM base AS windows
-    EXPOSE 1194/udp
-
-    RUN apk add openvpn=2.4.3-r0 git openssl && \
-    # Get easy-rsa
-        git clone https://github.com/OpenVPN/easy-rsa.git /tmp/easy-rsa && \
-        cd && \
-    # Cleanup
-        apk del git && \
-        rm -rf /tmp/easy-rsa/.git && cp -a /tmp/easy-rsa /usr/local/share/ && \
-        rm -rf /tmp/easy-rsa/ && \
-        ln -s /usr/local/share/easy-rsa/easyrsa3/easyrsa /usr/local/bin
-
-    ADD src/templates/openvpn.conf /etc/openvpn/openvpn.conf
-    RUN mkdir /etc/openvpn/certs.d
-    ADD conf/certs.d /etc/openvpn/certs.d
-    RUN chmod 600 /etc/openvpn/certs.d/*.key
-
-    RUN modprobe tun; \
-        echo "tun" >> /etc/modules-load.d/tun.conf
