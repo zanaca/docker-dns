@@ -19,7 +19,7 @@ RESOLVCONF = '/run/resolvconf/resolv.conf'
 RESOLVCONF_HEADER = 'options timeout:1 #@docker-dns\nnameserver 127.0.0.1 #@docker-dns'
 CMD_PATH = '/mnt/c/Windows/System32/cmd.exe'
 POWERSHELL_PATH = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0//powershell.exe'
-STARTUP_FOLDER_PATH = '/mnt/c/Users/[USERNAME]/AppData/Roaming/Microsoft/Windows/Start\ Menu/Programs/StartUp'
+STARTUP_FOLDER_PATH = '/mnt/c/Users/[USERNAME]/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup'
 DOCKER_BUILD_TARGET = 'base'
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
@@ -125,10 +125,10 @@ reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Se
 """
 
     file_name = f'{STARTUP_FOLDER_PATH}/docker-dns.bat'
-    file_name = file_name.replace('[USERNAME'], __get_windows_username())
+    file_name = file_name.replace('[USERNAME]', __get_windows_username())
     open(file_name, 'w').write(script)
 
-    file_name = file_name.replace('/mnt/c', 'C:').replace('/', '\\\\')
+    file_name = file_name.replace('/mnt/c', 'C:').replace(' ', '\ ').replace('/', '\\\\')
     os.system(f'{CMD_PATH} /c {file_name} &')
 
 def __get_ssh_port():
@@ -214,7 +214,7 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         print('Removing kwown_hosts backup')
         os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
-    file_name = file_name.replace('[USERNAME'], __get_windows_username())
+    file_name = file_name.replace('[USERNAME]', __get_windows_username())
     file_name = f'{STARTUP_FOLDER_PATH}/docker-dns.bat'
     if os.path.exists(file_name):
         print('Removing bat file from Windows Startup folder')
