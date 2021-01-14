@@ -65,7 +65,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     docker_json['bip'] = docker.NETWORK_SUBNET
     docker_json['dns'] = list(
         set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
-    json.dump(docker_json, open(DOCKER_CONF_FILE, 'w'))
+    json.dumps(docker_json, open(DOCKER_CONF_FILE, 'w'), indent=4, sort_keys=True)
 
     if docker.check_exists(name):
         print("Stopping existing container...")
