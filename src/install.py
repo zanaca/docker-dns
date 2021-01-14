@@ -54,8 +54,6 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
             RESOLVCONF_DATA = f"options timeout:1 #@docker-dns\nnameserver {dns} #@docker-dns\n{RESOLVCONF_DATA}"
             open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
 
-    os_config = OS.setup(tld)
-
     # docker
     DOCKER_CONF_FILE = f"{OS.DOCKER_CONF_FOLDER}/daemon.json"
     if not os.path.exists(DOCKER_CONF_FILE) or os.stat(DOCKER_CONF_FILE).st_size == 0:
