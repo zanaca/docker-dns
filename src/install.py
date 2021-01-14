@@ -1,7 +1,7 @@
 import os
 import time
 import shutil
-import json
+import simplejson
 import sys
 
 import config
@@ -61,11 +61,12 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
             os.mkdir(OS.DOCKER_CONF_FOLDER)
         shutil.copy2('src/templates/daemon.json', DOCKER_CONF_FILE)
 
-    docker_json = json.loads(open(DOCKER_CONF_FILE, 'r').read())
+    docker_json = simplejson.loads(open(DOCKER_CONF_FILE, 'r').read())
     docker_json['bip'] = docker.NETWORK_SUBNET
     docker_json['dns'] = list(
         set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
-    json.dumps(docker_json, open(DOCKER_CONF_FILE, 'w'), indent=4, sort_keys=True)
+    with open(DOCKER_CONF_FILE, 'w') as daemon_file:
+    	daemon_file.write(simplejson.dumps(docker_json, indent=4, sort_keys=True))
 
     if docker.check_exists(name):
         print("Stopping existing container...")
