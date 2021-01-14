@@ -18,6 +18,8 @@ elif util.on_wsl:
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.ubuntu as OS
+    if config.NAME.lower() == 'linux mint':
+        import OSes.mint as OS
 
 RESOLVCONF = '/etc/resolv.conf'
 
@@ -77,17 +79,6 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     docker.build_container(
         name, tag, tld, bind_port_ip=util.on_linux and not util.on_wsl, target=OS.DOCKER_BUILD_TARGET)
     update_cache()
-
-    # dnsmasq
-    # if not util.on_macos:
-    #     print("Setting up dnsmasq")
-
-    #     dnsmasq_local = open(OS.DNSMASQ_LOCAL_CONF, 'r').read()
-    #     dnsmasq_local = dnsmasq_local.replace('${IP}', docker.NETWORK_GATEWAY)
-    #     dnsmasq_local = dnsmasq_local.replace('${HOSTNAME}', config.HOSTNAME)
-    #     dnsmasq_local = dnsmasq_local.replace(
-    #         '${LOOPBACK}', network.LOOPBACK_NETWORK_NAME)
-    #     json.dump(dnsmasq_local, open(OS.DNSMASQ_LOCAL_CONF, 'w'))
 
     # TLD domain ceriticate
     cert_file = f'certs.d/tld/{tld}.cert'
