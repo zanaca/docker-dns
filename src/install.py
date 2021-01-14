@@ -8,7 +8,6 @@ import config
 import dockerapi as docker
 import util
 import network
-import tunnel
 
 if util.on_macos:
     import OSes.macos as OS

@@ -1,10 +1,7 @@
 import os
 
 import config
-import dockerapi as docker
-import util
-import network
-import tunnel
+
 
 FLAVOR = 'ubuntu'
 DOCKER_CONF_FOLDER = '/etc/docker'

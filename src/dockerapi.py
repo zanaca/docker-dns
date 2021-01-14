@@ -1,7 +1,4 @@
-import os
-
 import docker
-import util
 import config
 
 errors = docker.errors

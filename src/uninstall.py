@@ -1,7 +1,6 @@
 import os
 import shutil
 import json
-import sys
 
 import config
 import dockerapi as docker
