@@ -14,10 +14,8 @@ elif util.on_wsl:
     import OSes.windows_wsl2 as OS
 
 elif util.on_linux:
-    if config.NAME == 'Ubuntu':
+    if config.NAME in ('Ubuntu', 'Linux Mint'):
         import OSes.ubuntu as OS
-    # else:
-    #    import OSes.debian as OS
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):

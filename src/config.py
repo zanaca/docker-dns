@@ -19,8 +19,7 @@ HOSTUNAME = platform.uname().system
 
 if util.on_macos or util.on_windows:
     NAME = platform.uname()[0]
-# elif util.on_wsl:
-#    NAME = 'wsl2'
+
 else:
     NAME = open('/etc/os-release',
                 'r').read().split('NAME="')[1].split('"')[0]

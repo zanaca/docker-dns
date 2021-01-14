@@ -59,7 +59,6 @@ def build_container(
 
     port_53 = 53
     if bind_port_ip:
-        # if util.on_linux:
         port_53 = (NETWORK_GATEWAY, 53)
 
     host_config = client.api.create_host_config(
@@ -79,7 +78,6 @@ def build_container(
                                                     '/var/run/docker.sock'],
                                                 environment=[
                                                     f'TOP_LEVEL_DOMAIN={tld}', f'HOSTNAME={config.HOSTNAME}', f'HOSTUNAME={config.HOSTUNAME}'],
-                                                #ports=['53/udp', 53],
                                                 host_config=host_config,
                                                 detach=True
                                                 )
