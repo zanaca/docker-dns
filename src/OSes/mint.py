@@ -3,7 +3,7 @@ import os
 import config
 
 
-FLAVOR = 'ubuntu'
+FLAVOR = 'mint'
 DOCKER_CONF_FOLDER = '/etc/docker'
 DNSMASQ_LOCAL_CONF = '/etc/NetworkManager/dnsmasq.d/01_docker'
 DOCKER_BUILD_TARGET = 'base'

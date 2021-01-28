@@ -1,5 +1,3 @@
-import time
-import socket
 import shutil
 import os
 import sys
@@ -41,10 +39,7 @@ def connect(verbose=False):
 
     sys.argv += ['--pidfile=/tmp/sshuttle.pid',
                  '-r', f'root@127.0.0.1:{port}', docker.NETWORK_SUBNET]
-    #           '-r', f'root@127.0.0.1:{port}', '-x', '10.0.0.0/8', '-x', '192.168.0.0/16', '0/0']
-    # while True:
     sshuttle_fake_caller()
-    #    time.sleep(1)
     return 0
 
 

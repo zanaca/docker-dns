@@ -19,8 +19,7 @@ HOSTUNAME = platform.uname().system
 
 if util.on_macos or util.on_windows:
     NAME = platform.uname()[0]
-# elif util.on_wsl:
-#    NAME = 'wsl2'
+
 else:
     NAME = open('/etc/os-release',
                 'r').read().split('NAME="')[1].split('"')[0]
@@ -39,7 +38,10 @@ else:
         '/etc/os-release', 'r').read().split('VERSION_ID="')[1].split('"')[0]
     version = VERSION_MAJOR_ID.split('.')
 
-OS_VERSION = int(version[1]) + int(version[0]) * 1000
+if len(version) > 1:
+    OS_VERSION = int(version[1]) + int(version[0]) * 1000
+else:
+    OS_VERSION = int(version[0]) * 1000
 del(version)
 
 OS = f'{HOSTUNAME}_{NAME}'

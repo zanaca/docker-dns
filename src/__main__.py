@@ -1,6 +1,5 @@
 import sys
-import os
-from argparse import ArgumentParser, Action, ArgumentTypeError as Fatal
+from argparse import ArgumentParser, ArgumentTypeError as Fatal
 
 import config
 import util

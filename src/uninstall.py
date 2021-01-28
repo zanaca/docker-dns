@@ -1,7 +1,6 @@
 import os
 import shutil
 import json
-import sys
 
 import config
 import dockerapi as docker
@@ -17,8 +16,8 @@ elif util.on_wsl:
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.ubuntu as OS
-    # else:
-    #    import OSes.debian as OS
+    elif config.NAME.lower() == 'linux mint':
+        import OSes.mint as OS
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):

@@ -5,7 +5,6 @@ import time
 import config
 import dockerapi as docker
 import util
-import network
 
 FLAVOR = 'macos'
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'

@@ -1,0 +1,4 @@
+[flake8]
+ignore=N806,N803
+max-line-length=119
+max-complexity=7
