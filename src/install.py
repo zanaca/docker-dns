@@ -18,7 +18,7 @@ elif util.on_wsl:
 elif util.on_linux:
     if config.NAME == 'Ubuntu':
         import OSes.ubuntu as OS
-    if config.NAME.lower() == 'linux mint':
+    elif config.NAME.lower() == 'linux mint':
         import OSes.mint as OS
 
 RESOLVCONF = '/etc/resolv.conf'
