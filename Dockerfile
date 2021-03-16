@@ -1,4 +1,4 @@
-FROM alpine:latest AS base
+FROM alpine:3.12.1 AS base
     LABEL maintainer="carlos@zanaca.com"
 
     VOLUME /var/run
@@ -9,8 +9,6 @@ FROM alpine:latest AS base
     ENV DOCKER_GEN_VERSION 0.7.4
     ENV DOCKER_HOST unix:///var/run/docker.sock
     ENV HOSTUNAME Linux
-    RUN echo "nameserver 1.1.1.1" > /etc/resolv.conf; \
-        echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
     RUN wget -qO- https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz | tar xvz -C /usr/local/bin
     ADD src/templates/dnsmasq.tpl /root/dnsmasq.tpl
