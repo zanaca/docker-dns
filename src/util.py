@@ -1,6 +1,6 @@
 import platform
 import os
-from OpenSSL import crypto, SSL
+from OpenSSL import crypto
 import shutil
 
 import config

@@ -21,6 +21,7 @@ By default it will enable create that hosts: _ns0.docker_ and _ns0.\$YOUR_HOSTNA
 
 -   Docker 19.03.13
 -   Ubuntu: 20.04
+-   Linux Mint: 20, 20.1
 -   macOS: Catalina, Big Sur
 -   Windows: 10 (WSL2 - Ubuntu)
 
