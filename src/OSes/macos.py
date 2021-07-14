@@ -10,7 +10,7 @@ FLAVOR = 'macos'
 PLIST_PATH = '/Library/LaunchDaemons/com.zanaca.dockerdns-tunnel.plist'
 KNOWN_HOSTS_FILE = f'{config.HOME_ROOT}/.ssh/known_hosts'
 APP_DESTINATION = f'{config.HOME}/Applications/dockerdns-tunnel.app'
-DOCKER_CONF_FOLDER = f'{config.HOME}/Library/Containers/com.docker.docker/Data/database/com.docker.driver.amd64-linux/etc/docker'
+DOCKER_CONF_FOLDER = f'{config.HOME}/.docker'
 DOCKER_BUILD_TARGET = 'base'
 
 
