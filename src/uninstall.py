@@ -1,6 +1,7 @@
+import json
 import os
 import shutil
-import json
+import subprocess
 
 import config
 import dockerapi as docker
@@ -46,6 +47,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         lines = [l for l in lines if l.startswith('#')]
         open(resolvconf_head, 'w').writelines(lines)
         open(resolvconf_tail, 'w').write('')
+        subprocess.run(['sudo', 'resolvconf', '-u'])
     except FileNotFoundError:
         pass
 

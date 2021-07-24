@@ -1,13 +1,14 @@
-import os
-import time
-import shutil
 import json
+import os
+import shutil
+import subprocess
 import sys
+import time
 
 import config
 import dockerapi as docker
-import util
 import network
+import util
 
 if util.on_macos:
     import OSes.macos as OS
@@ -52,8 +53,9 @@ def update_resolvconf():
         if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
             open(RESOLVCONF_HEAD, 'a').write(name_servers)
             open(RESOLVCONF_TAIL, 'a').write(options)
-
-        open(RESOLVCONF, 'a').write(f'{name_servers}{options}')
+            subprocess.run(['sudo', 'resolvconf', '-u'])
+        else:
+            open(RESOLVCONF, 'a').write(f'{name_servers}{options}')
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
