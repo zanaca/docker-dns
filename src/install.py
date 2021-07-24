@@ -23,7 +23,6 @@ elif util.on_linux:
 
 RESOLVCONF = '/etc/resolv.conf'
 RESOLVCONF_HEAD = '/etc/resolvconf/resolv.conf.d/head'
-RESOLVCONF_BASE = '/etc/resolvconf/resolv.conf.d/base'
 
 
 def update_cache():
