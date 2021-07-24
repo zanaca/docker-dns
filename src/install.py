@@ -49,11 +49,7 @@ def update_resolvconf():
                           f'options timeout:1 #@docker-dns\n'
         open(RESOLVCONF, 'a').write(resolvconf_data)
         if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
-            try:
-                open(RESOLVCONF_HEAD, 'a').write(resolvconf_data)
-            except FileNotFoundError:
-                print('package "resolvconf" not installed, please install it with "sudo apt install resolvconf"')
-                return 1
+            open(RESOLVCONF_HEAD, 'a').write(resolvconf_data)
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
@@ -63,7 +59,11 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     if os.path.exists('.cache/INSTALLED'):
         os.unlink('.cache/INSTALLED')
 
-    update_resolvconf()
+    try:
+        update_resolvconf()
+    except FileNotFoundError:
+        print('package "resolvconf" not installed, please install it with "sudo apt install resolvconf"')
+        return 1
 
     # docker
     docker_conf_file = f"{OS.DOCKER_CONF_FOLDER}/daemon.json"
