@@ -21,8 +21,6 @@ elif util.on_linux:
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
-    util.is_super_user()
-
     if not util.check_if_installed():
         print('No installation found')
         return 1
@@ -32,13 +30,22 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         print("Removing existing container...")
         docker.purge(name)
 
-    DOCKER_CONF_FILE = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
-    if os.path.exists(DOCKER_CONF_FILE):
-        shutil.copy2('src/templates/daemon.json', DOCKER_CONF_FILE)
-        docker_json = json.loads(open(DOCKER_CONF_FILE, 'r').read())
+    docker_conf_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
+    if os.path.exists(docker_conf_file):
+        shutil.copy2('src/templates/daemon.json', docker_conf_file)
+        docker_json = json.loads(open(docker_conf_file, 'r').read())
         docker_json['bip'] = ''
         docker_json['dns'] = []
-        json.dump(docker_json, open(DOCKER_CONF_FILE, 'w'))
+        json.dump(docker_json, open(docker_conf_file, 'w'))
+
+    resolvconf_head = '/etc/resolvconf/resolv.conf.d/head'
+
+    try:
+        lines = open(resolvconf_head).readlines()
+        lines = [l for l in lines if l.startswith('#')]
+        open(resolvconf_head).writelines(lines)
+    except FileNotFoundError:
+        pass
 
     OS.uninstall(tld)
     return 0

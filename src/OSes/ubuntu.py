@@ -7,7 +7,6 @@ FLAVOR = 'ubuntu'
 DOCKER_CONF_FOLDER = '/etc/docker'
 DNSMASQ_LOCAL_CONF = '/etc/NetworkManager/dnsmasq.d/01_docker'
 DOCKER_BUILD_TARGET = 'base'
-RESOLVCONF_HEAD = '/etc/resolvconf/resolv.conf.d/head'
 
 
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
@@ -25,10 +24,3 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
 def uninstall(tld=config.TOP_LEVEL_DOMAIN):
     if os.path.exists(DNSMASQ_LOCAL_CONF):
         os.unlink(DNSMASQ_LOCAL_CONF)
-
-    try:
-        lines = open(RESOLVCONF_HEAD).readlines()
-        lines = [l for l in lines if l.startswith('#')]
-        open(RESOLVCONF_HEAD).writelines(lines)
-    except FileNotFoundError:
-        pass
