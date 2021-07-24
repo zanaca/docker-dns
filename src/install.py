@@ -46,44 +46,14 @@ def update_resolvconf():
             # no DNS
             pass
 
-        docker_dns_name_server = f'nameserver {dns} #@docker-dns\n'
-        docker_dns_option = f'options timeout:1 #@docker-dns\n'
-        comments = []
-        name_servers = []
-        searches = []
-        options = []
-        other = []
-        resolvconf_data_lines = open(RESOLVCONF, 'r').readlines()
-        for line in resolvconf_data_lines:
-            if line.startswith('#'):
-                comments.append(line)
-
-            elif line.startswith('nameserver'):
-                name_servers.append(line)
-
-            elif line.startswith('search'):
-                searches.append(line)
-
-            elif line.startswith('options'):
-                options.append(line)
-
-            else:
-                other.append(line)
-
-        comments.append('\n')
-        if docker_dns_name_server not in name_servers:
-            name_servers = [docker_dns_name_server] + name_servers
-
-        if docker_dns_option not in options:
-            options = [docker_dns_option] + options
-
-        resolvconf_data = ''.join(comments + name_servers + searches + options + other)
+        resolvconf_data = f'nameserver {dns} #@docker-dns\n' \
+                          f'options timeout:1 #@docker-dns\n'
         open(RESOLVCONF, 'a').write(resolvconf_data)
         if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
             try:
-                pass
+                open(RESOLVCONF_HEAD, 'a').write(resolvconf_data)
             except FileNotFoundError:
-                print('')
+                print('"resolvconf" not installed, please install it with "sudo apt install resolvconf"')
                 return 1
 
 
