@@ -43,7 +43,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     try:
         lines = open(resolvconf_head).readlines()
         lines = [l for l in lines if l.startswith('#')]
-        open(resolvconf_head).writelines(lines)
+        open(resolvconf_head, 'w').writelines(lines)
     except FileNotFoundError:
         pass
 
