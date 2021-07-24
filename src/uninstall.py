@@ -21,6 +21,8 @@ elif util.on_linux:
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
+    util.is_super_user()
+
     if not util.check_if_installed():
         print('No installation found')
         return 1
