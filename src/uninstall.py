@@ -39,11 +39,13 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         json.dump(docker_json, open(docker_conf_file, 'w'))
 
     resolvconf_head = '/etc/resolvconf/resolv.conf.d/head'
+    resolvconf_tail = '/etc/resolvconf/resolv.conf.d/tail'
 
     try:
         lines = open(resolvconf_head).readlines()
         lines = [l for l in lines if l.startswith('#')]
         open(resolvconf_head, 'w').writelines(lines)
+        open(resolvconf_tail, 'w').write('')
     except FileNotFoundError:
         pass
 

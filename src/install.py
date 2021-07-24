@@ -23,6 +23,7 @@ elif util.on_linux:
 
 RESOLVCONF = '/etc/resolv.conf'
 RESOLVCONF_HEAD = '/etc/resolvconf/resolv.conf.d/head'
+RESOLVCONF_TAIL = '/etc/resolvconf/resolv.conf.d/tail'
 
 
 def update_cache():
@@ -44,14 +45,15 @@ def update_resolvconf():
             # no DNS
             pass
 
-        resolvconf_data = f'nameserver {dns} #@docker-dns\n' \
-                          f'nameserver 1.1.1.1 #@docker-dns\n' \
-                          f'nameserver 8.8.8.8 #@docker-dns\n' \
-                          f'options timeout:1 #@docker-dns\n'
+        name_servers = f'nameserver {dns} #@docker-dns\n' \
+                       f'nameserver 1.1.1.1 #@docker-dns\n' \
+                       f'nameserver 8.8.8.8 #@docker-dns\n'
+        options = 'options timeout:1 #@docker-dns\n'
         if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
-            open(RESOLVCONF_HEAD, 'a').write(resolvconf_data)
+            open(RESOLVCONF_HEAD, 'a').write(name_servers)
+            open(RESOLVCONF_TAIL, 'a').write(options)
 
-        open(RESOLVCONF, 'a').write(resolvconf_data)
+        open(RESOLVCONF, 'a').write(f'{name_servers}{options}')
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
