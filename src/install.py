@@ -52,7 +52,7 @@ def update_resolvconf():
             try:
                 open(RESOLVCONF_HEAD, 'a').write(resolvconf_data)
             except FileNotFoundError:
-                print('"resolvconf" not installed, please install it with "sudo apt install resolvconf"')
+                print('package "resolvconf" not installed, please install it with "sudo apt install resolvconf"')
                 return 1
 
 
