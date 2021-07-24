@@ -62,7 +62,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         shutil.copy2('src/templates/daemon.json', DOCKER_CONF_FILE)
 
     docker_json = json.loads(open(DOCKER_CONF_FILE, 'r').read())
-    docker_json['bip'] = docker.NETWORK_SUBNET
+    docker_json['bip'] = docker.DAEMON_BIP
     docker_json['dns'] = list(
         set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
     with open(DOCKER_CONF_FILE, 'w') as daemon_file:
