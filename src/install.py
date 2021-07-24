@@ -87,8 +87,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         docker.purge(name)
         time.sleep(2)
 
-    print(
-        f'Building and running container "{tag}:latest"... Please wait')
+    print(f'Building and running container "{tag}:latest"... Please wait')
     docker.build_container(
         name, tag, tld, bind_port_ip=util.on_linux and not util.on_wsl, target=OS.DOCKER_BUILD_TARGET)
     update_cache()
