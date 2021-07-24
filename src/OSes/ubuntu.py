@@ -27,6 +27,8 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         os.unlink(DNSMASQ_LOCAL_CONF)
 
     try:
-        open(RESOLVCONF_HEAD).write('')
+        lines = open(RESOLVCONF_HEAD).readlines()
+        lines = [l for l in lines if l.startswith('#')]
+        open(RESOLVCONF_HEAD).writelines(lines)
     except FileNotFoundError:
         pass
