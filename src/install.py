@@ -78,8 +78,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
 
     docker_json = json.loads(open(docker_conf_file, 'r').read())
     docker_json['bip'] = docker.NETWORK_SUBNET
-    docker_json['dns'] = list(
-        set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
+    docker_json['dns'] = [{docker.NETWORK_GATEWAY, *network.get_dns_servers()}]
     with open(docker_conf_file, 'w') as daemon_file:
         daemon_file.write(json.dumps(docker_json, indent=4, sort_keys=True))
 
