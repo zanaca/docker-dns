@@ -47,9 +47,10 @@ def update_resolvconf():
 
         resolvconf_data = f'nameserver {dns} #@docker-dns\n' \
                           f'options timeout:1 #@docker-dns\n'
-        open(RESOLVCONF, 'a').write(resolvconf_data)
         if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
             open(RESOLVCONF_HEAD, 'a').write(resolvconf_data)
+
+        open(RESOLVCONF, 'a').write(resolvconf_data)
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
