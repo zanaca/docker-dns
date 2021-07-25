@@ -31,21 +31,16 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         print("Removing existing container...")
         docker.purge(name)
 
-    docker_conf_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
-    if os.path.exists(docker_conf_file):
-        shutil.copy2('src/templates/daemon.json', docker_conf_file)
-        docker_json = json.loads(open(docker_conf_file, 'r').read())
-        docker_json['bip'] = ''
-        docker_json['dns'] = []
-        json.dump(docker_json, open(docker_conf_file, 'w'))
+    docker_daemon_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
+    if os.path.exists(docker_daemon_file):
+        os.remove(docker_daemon_file)
 
     resolvconf_head = '/etc/resolvconf/resolv.conf.d/head'
     resolvconf_tail = '/etc/resolvconf/resolv.conf.d/tail'
-
     try:
         lines = open(resolvconf_head).readlines()
-        lines = [l for l in lines if l.startswith('#')]
-        open(resolvconf_head, 'w').writelines(lines)
+        comments = [line for line in lines if line.startswith('#')]
+        open(resolvconf_head, 'w').writelines(comments)
         open(resolvconf_tail, 'w').write('')
         subprocess.run(['sudo', 'resolvconf', '-u'])
     except FileNotFoundError:
