@@ -55,17 +55,17 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
             open(RESOLVCONF, 'w').write(RESOLVCONF_DATA)
 
     # docker
-    DOCKER_CONF_FILE = f"{OS.DOCKER_CONF_FOLDER}/daemon.json"
-    if not os.path.exists(DOCKER_CONF_FILE) or os.stat(DOCKER_CONF_FILE).st_size == 0:
+    docker_conf_file = f"{OS.DOCKER_CONF_FOLDER}/daemon.json"
+    if not os.path.exists(docker_conf_file) or os.stat(docker_conf_file).st_size == 0:
         if not os.path.isdir(OS.DOCKER_CONF_FOLDER):
             os.mkdir(OS.DOCKER_CONF_FOLDER)
-        shutil.copy2('src/templates/daemon.json', DOCKER_CONF_FILE)
+        shutil.copy2('src/templates/daemon.json', docker_conf_file)
 
-    docker_json = json.loads(open(DOCKER_CONF_FILE, 'r').read())
-    docker_json['bip'] = docker.NETWORK_SUBNET
+    docker_json = json.loads(open(docker_conf_file, 'r').read())
+    docker_json['bip'] = docker.DAEMON_BIP
     docker_json['dns'] = list(
         set([docker.NETWORK_GATEWAY] + network.get_dns_servers()))
-    with open(DOCKER_CONF_FILE, 'w') as daemon_file:
+    with open(docker_conf_file, 'w') as daemon_file:
         daemon_file.write(json.dumps(docker_json, indent=4, sort_keys=True))
 
     if docker.check_exists(name):
