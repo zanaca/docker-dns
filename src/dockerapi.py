@@ -5,15 +5,17 @@ errors = docker.errors
 
 client = docker.from_env()
 
-__network_config = client.networks.get(
-    'bridge').attrs['IPAM']['Config'][0]
-NETWORK_SUBNET = __network_config['Subnet']
-NETWORK_GATEWAY = None
-if 'Gateway' in __network_config:
-    NETWORK_GATEWAY = __network_config['Gateway']
-else:
+__network_config = client.networks.get('bridge').attrs.get('IPAM').get('Config')[0]
+
+NETWORK_SUBNET = __network_config.get('Subnet')
+DAEMON_BIP = NETWORK_SUBNET.split('.')
+ip_range = DAEMON_BIP[-1].split('/')[-1]
+DAEMON_BIP[-1] = f'1/{ip_range}'
+DAEMON_BIP = '.'.join(DAEMON_BIP)
+NETWORK_GATEWAY = __network_config.get('Gateway')
+if not NETWORK_GATEWAY:
     NETWORK_GATEWAY = NETWORK_SUBNET.split('.')
-    NETWORK_GATEWAY[3] = '1'
+    NETWORK_GATEWAY[-1] = '1'
     NETWORK_GATEWAY = '.'.join(NETWORK_GATEWAY)
 
 
