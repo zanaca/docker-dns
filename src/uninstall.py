@@ -40,7 +40,7 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         comments = [line for line in lines if line.startswith('#')]
         open(resolvconf_head, 'w').writelines(comments)
         open(resolvconf_tail, 'w').write('')
-        subprocess.run(['sudo', 'resolvconf', '-u'])
+        subprocess.run(['resolvconf', '-u'])
     except FileNotFoundError:
         pass
 

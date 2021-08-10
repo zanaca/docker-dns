@@ -53,7 +53,7 @@ def update_resolvconf():
         if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
             open(RESOLVCONF_HEAD, 'a').write(name_servers)
             open(RESOLVCONF_TAIL, 'a').write(options)
-            subprocess.run(['sudo', 'resolvconf', '-u'])
+            subprocess.run(['resolvconf', '-u'])
         else:
             open(RESOLVCONF, 'a').write(f'{name_servers}{options}')
 
