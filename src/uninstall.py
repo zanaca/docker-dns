@@ -30,13 +30,9 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         print("Removing existing container...")
         docker.purge(name)
 
-    DOCKER_CONF_FILE = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
-    if os.path.exists(DOCKER_CONF_FILE):
-        shutil.copy2('src/templates/daemon.json', DOCKER_CONF_FILE)
-        docker_json = json.loads(open(DOCKER_CONF_FILE, 'r').read())
-        docker_json['bip'] = ''
-        docker_json['dns'] = []
-        json.dump(docker_json, open(DOCKER_CONF_FILE, 'w'))
+    docker_conf_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
+    if os.path.exists(docker_conf_file):
+        os.remove(docker_conf_file)
 
     OS.uninstall(tld)
     return 0
