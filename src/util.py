@@ -33,11 +33,11 @@ def is_os_supported(os=None):
     min = int(min[1]) + int(min[0]) * 1000
     max = int(max[1]) + int(max[0]) * 1000
 
-    if min > config.OS_VERSION:
+    if config.OS_VERSION < min:
         print('WARNING: Your OS version is not supported.')
         return False
 
-    if max < config.OS_VERSION:
+    if config.OS_VERSION > max:
         print('WARNING: Your OS is newer than the last tested version.')
 
     return True
