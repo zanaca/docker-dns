@@ -8,7 +8,7 @@ import config
 on_macos = platform.uname().system.lower() == 'darwin'
 on_windows = platform.uname().system.lower() == 'windows'
 on_linux = platform.uname().system.lower() == 'linux'
-on_wsl = on_linux and "microsoft" in platform.uname().release.lower()
+on_wsl = on_linux and 'microsoft' in platform.uname().release.lower()
 
 
 def is_supported():
@@ -16,29 +16,36 @@ def is_supported():
 
 
 def is_os_supported(os=None):
-    if not os or os not in config.SUPPORTED_OSES:
+    if not os or os not in config.SUPPORTED_OS_VERSIONS:
         return False
 
-    os_data = config.SUPPORTED_OSES[os]
-    min = os_data['min']
-    max = os_data['max']
-    if '.' not in min:
-        min += '.0'
-    if '.' not in max:
-        max += '.0'
-    min = min.split('.')
-    max = max.split('.')
+    not_supported_error_msg = f'ERROR: Your OS version is not supported.\n' \
+                              f'Min version: {config.SUPPORTED_OS_VERSIONS.get(os).get("min")}\n' \
+                              f'Sys version: {config.OS_VERSION}'
 
-    # if os in ['macos', 'ubuntu']:
-    min = int(min[1]) + int(min[0]) * 1000
-    max = int(max[1]) + int(max[0]) * 1000
+    not_supported_warning_msg = f'WARNING: Your OS is newer than the last tested version.\n' \
+                                f'Tested version: {config.SUPPORTED_OS_VERSIONS.get(os).get("max")}\n' \
+                                f'System version: {config.OS_VERSION}'
 
-    if config.OS_VERSION < min:
-        print('WARNING: Your OS version is not supported.')
+    os_current_version = config.OS_VERSION.split('.')
+
+    os_min_supported_version = config.SUPPORTED_OS_VERSIONS.get(os).get('min').split('.')
+    if int(os_current_version[0]) < int(os_min_supported_version[0]):
+        print(not_supported_error_msg)
         return False
 
-    if config.OS_VERSION > max:
-        print('WARNING: Your OS is newer than the last tested version.')
+    if len(os_current_version) > 1 and len(os_min_supported_version) > 1 and \
+            int(os_current_version[1]) < int(os_min_supported_version[1]):
+        print(not_supported_error_msg)
+        return False
+
+    os_max_supported_version = config.SUPPORTED_OS_VERSIONS.get(os).get('max').split('.')
+    if int(os_current_version[0]) > int(os_max_supported_version[0]):
+        print(not_supported_warning_msg)
+
+    elif len(os_current_version) > 1 and len(os_max_supported_version) > 1 and \
+            int(os_current_version[1]) > int(os_max_supported_version[1]):
+        print(not_supported_warning_msg)
 
     return True
 
