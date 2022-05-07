@@ -19,33 +19,22 @@ def is_os_supported(os=None):
     if not os or os not in config.SUPPORTED_OS_VERSIONS:
         return False
 
-    not_supported_error_msg = f'ERROR: Your OS version is not supported.\n' \
-                              f'Min version: {config.SUPPORTED_OS_VERSIONS.get(os).get("min")}\n' \
-                              f'Sys version: {config.OS_VERSION}'
+    os_major, os_minor, _ = f'{config.OS_VERSION}.0.0'.split('.', 2)
+    os_min_major, os_min_minor, _ = f'{config.SUPPORTED_OS_VERSIONS.get(os).get("min")}.0.0'.split('.', 2)
+    os_max_major, os_max_minor, _ = f'{config.SUPPORTED_OS_VERSIONS.get(os).get("max")}.0.0'.split('.', 2)
 
-    not_supported_warning_msg = f'WARNING: Your OS is newer than the last tested version.\n' \
-                                f'Tested version: {config.SUPPORTED_OS_VERSIONS.get(os).get("max")}\n' \
-                                f'System version: {config.OS_VERSION}'
-
-    os_current_version = config.OS_VERSION.split('.')
-
-    os_min_supported_version = config.SUPPORTED_OS_VERSIONS.get(os).get('min').split('.')
-    if int(os_current_version[0]) < int(os_min_supported_version[0]):
-        print(not_supported_error_msg)
+    if int(os_major) < int(os_min_major) or \
+            int(os_major) == int(os_min_major) and int(os_minor) < int(os_min_minor):
+        print(f'ERROR: Your OS version is not supported.\n'
+              f'Min version: {config.SUPPORTED_OS_VERSIONS.get(os).get("min")}\n'
+              f'Sys version: {config.OS_VERSION}')
         return False
 
-    if len(os_current_version) > 1 and len(os_min_supported_version) > 1 and \
-            int(os_current_version[1]) < int(os_min_supported_version[1]):
-        print(not_supported_error_msg)
-        return False
-
-    os_max_supported_version = config.SUPPORTED_OS_VERSIONS.get(os).get('max').split('.')
-    if int(os_current_version[0]) > int(os_max_supported_version[0]):
-        print(not_supported_warning_msg)
-
-    elif len(os_current_version) > 1 and len(os_max_supported_version) > 1 and \
-            int(os_current_version[1]) > int(os_max_supported_version[1]):
-        print(not_supported_warning_msg)
+    if int(os_major) > int(os_max_major) or \
+            int(os_major) == int(os_max_major) and int(os_minor) > int(os_max_minor):
+        print(f'WARNING: Your OS is newer than the last tested version.\n'
+              f'Tested version: {config.SUPPORTED_OS_VERSIONS.get(os).get("max")}\n'
+              f'System version: {config.OS_VERSION}')
 
     return True
 
