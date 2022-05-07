@@ -48,4 +48,4 @@ OS = f'{HOSTUNAME}_{NAME}'
 TOP_LEVEL_DOMAIN = (util.read_cache('tld') or 'docker').strip()
 DOCKER_CONTAINER_TAG = (util.read_cache('tag') or 'ns0').strip()
 DOCKER_CONTAINER_NAME = (util.read_cache('name') or DOCKER_CONTAINER_TAG).strip()
-SUPPORTED_OSES = json.load(open(f'{BASE_PATH}/supported_os.json', 'r'))
+SUPPORTED_OS_VERSIONS = json.load(open(f'{BASE_PATH}/supported_os.json', 'r'))
