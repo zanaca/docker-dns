@@ -16,7 +16,7 @@ elif util.on_wsl:
     import OSes.windows_wsl2 as OS
 
 elif util.on_linux:
-    if config.NAME == 'Ubuntu':
+    if config.NAME == 'ubuntu':
         import OSes.ubuntu as OS
     elif config.NAME.lower() == 'linux mint':
         import OSes.mint as OS
