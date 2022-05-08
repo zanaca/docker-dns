@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 import config
 import dockerapi as docker
@@ -28,9 +29,20 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         print("Removing existing container...")
         docker.purge(name)
 
-    docker_conf_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
-    if os.path.exists(docker_conf_file):
-        os.remove(docker_conf_file)
+    docker_daemon_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
+    if os.path.exists(docker_daemon_file):
+        os.remove(docker_daemon_file)
+
+    resolvconf_head = '/etc/resolvconf/resolv.conf.d/head'
+    resolvconf_tail = '/etc/resolvconf/resolv.conf.d/tail'
+    try:
+        lines = open(resolvconf_head).readlines()
+        comments = [line for line in lines if line.startswith('#')]
+        open(resolvconf_head, 'w').writelines(comments)
+        open(resolvconf_tail, 'w').write('')
+        subprocess.run(['resolvconf', '-u'])
+    except FileNotFoundError:
+        pass
 
     OS.uninstall(tld)
     return 0

@@ -8,6 +8,7 @@ DOCKER_CONF_FOLDER = '/etc/docker'
 DNSMASQ_LOCAL_CONF = '/etc/NetworkManager/dnsmasq.d/01_docker'
 DOCKER_BUILD_TARGET = 'base'
 
+
 if not os.path.exists(DNSMASQ_LOCAL_CONF):
     DNSMASQ_LOCAL_CONF = DNSMASQ_LOCAL_CONF.replace('dnsmasq.d', 'conf.d')
 

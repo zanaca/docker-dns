@@ -1,4 +1,4 @@
-FROM alpine:3.12.1 AS base
+FROM alpine:3.15.0 AS base
     LABEL maintainer="carlos@zanaca.com"
 
     VOLUME /var/run
