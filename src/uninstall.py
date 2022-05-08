@@ -34,12 +34,10 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         os.remove(docker_daemon_file)
 
     resolvconf_head = '/etc/resolvconf/resolv.conf.d/head'
-    resolvconf_tail = '/etc/resolvconf/resolv.conf.d/tail'
     try:
         lines = open(resolvconf_head).readlines()
-        comments = [line for line in lines if line.startswith('#')]
-        open(resolvconf_head, 'w').writelines(comments)
-        open(resolvconf_tail, 'w').write('')
+        original_lines = [line for line in lines if not line.endswith('#docker-dns\n')]
+        open(resolvconf_head, 'w').writelines(original_lines)
         subprocess.run(['resolvconf', '-u'])
     except FileNotFoundError:
         pass
