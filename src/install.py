@@ -24,7 +24,6 @@ elif util.on_linux:
 
 RESOLVCONF = '/etc/resolv.conf'
 RESOLVCONF_HEAD = '/etc/resolvconf/resolv.conf.d/head'
-RESOLVCONF_TAIL = '/etc/resolvconf/resolv.conf.d/tail'
 
 
 def update_cache():
@@ -46,16 +45,21 @@ def update_resolvconf():
             # no DNS
             pass
 
-        name_servers = f'nameserver {dns} #@docker-dns\n' \
-                       f'nameserver 1.1.1.1 #cloudflare\n' \
-                       f'nameserver 8.8.8.8 #google\n'
-        options = 'options timeout:1 #@docker-dns\n'
-        if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
-            open(RESOLVCONF_HEAD, 'a').write(name_servers)
-            open(RESOLVCONF_TAIL, 'a').write(options)
+        resolvconf_new_lines = [
+            f'nameserver {dns} #@docker-dns\n',
+            'nameserver 1.1.1.1 #cloudflare #@docker-dns\n',
+            'nameserver 8.8.8.8 #google #@docker-dns\n',
+            'options timeout:1 #@docker-dns\n'
+        ]
+        if OS.FLAVOR == 'ubuntu' and int(config.OS_VERSION.split('.')[0]) >= 18:
+            resolvconf_head_lines = open(RESOLVCONF_HEAD, 'r').readlines()
+            resolvconf_new_lines_filtered = [line for line in resolvconf_new_lines if line not in resolvconf_head_lines]
+            open(RESOLVCONF_HEAD, 'a').writelines(resolvconf_new_lines_filtered)
             subprocess.run(['resolvconf', '-u'])
         else:
-            open(RESOLVCONF, 'a').write(f'{name_servers}{options}')
+            resolvconf_lines = open(RESOLVCONF, 'r').readlines()
+            resolvconf_new_lines_filtered = [line for line in resolvconf_new_lines if line not in resolvconf_lines]
+            open(RESOLVCONF, 'a').writelines(resolvconf_new_lines_filtered)
 
 
 def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld=config.TOP_LEVEL_DOMAIN):
