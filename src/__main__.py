@@ -64,20 +64,19 @@ def run():
         print('Sorry, your OS is not supported.')
         if util.on_windows and not util.on_wsl:
             print('Please make sure you are running on a WSL2 shell.')
+
         return 1
 
     opt = parser.parse_args()
-    run_status = 0
     try:
         if opt.COMMAND == 'show-domain':
             run_status = show_domain.main()
 
         elif opt.COMMAND == 'install':
             super_check()
-            output = install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
-            if output == 0:
+            run_status = install.main(name=opt.name, tag=opt.tag, tld=opt.tld)
+            if run_status == 0:
                 print(f'Now you can run "{sys.argv[0]} status" to verify')
-            run_status = output
 
         elif opt.COMMAND == 'uninstall':
             super_check()
@@ -89,11 +88,17 @@ def run():
 
         else:
             run_status = status.main()
+
         return run_status
 
     except Fatal as e:
-        print(f'fatal: {e}')
+        print(f'Fatal: {e}')
         return 1
+
     except KeyboardInterrupt:
         print('Keyboard interrupt: exiting.')
+        return 1
+
+    except Exception as e:
+        print(f'Exception: {e}')
         return 1
