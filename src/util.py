@@ -26,8 +26,8 @@ def is_os_supported(os=None):
     if int(os_major) < int(os_min_major) or \
             int(os_major) == int(os_min_major) and int(os_minor) < int(os_min_minor):
         print(f'ERROR: Your OS version is not supported.\n'
-              f'Min version: {config.SUPPORTED_OS_VERSIONS.get(os).get("min")}\n'
-              f'Sys version: {config.OS_VERSION}')
+              f'Minimun version: {config.SUPPORTED_OS_VERSIONS.get(os).get("min")}\n'
+              f'System version: {config.OS_VERSION}')
         return False
 
     if int(os_major) > int(os_max_major) or \
