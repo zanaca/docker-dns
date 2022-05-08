@@ -66,9 +66,6 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     if not util.is_os_supported(OS.FLAVOR):
         return 1
 
-    if os.path.exists('.cache/INSTALLED'):
-        os.unlink('.cache/INSTALLED')
-
     try:
         update_resolvconf()
     except FileNotFoundError:
@@ -112,5 +109,5 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
         original_arg.append('&')
         os.system(' '.join(original_arg))
 
-    open('.cache/INSTALLED', 'w').write('')
+    util.set_installed()
     return 0
