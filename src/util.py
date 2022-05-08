@@ -106,6 +106,10 @@ def check_if_installed():
     return os.path.exists(f'{config.BASE_PATH}/.cache/INSTALLED')
 
 
+def set_installed():
+    open(f'{config.BASE_PATH}/.cache/INSTALLED', 'w').write('')
+
+
 def remove_dir(base_path):
     for filename in os.listdir(base_path):
         if filename in ['.', '..']:
