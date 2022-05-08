@@ -1,7 +1,8 @@
-import platform
 import os
-from OpenSSL import crypto
+import platform
 import shutil
+
+from OpenSSL import crypto
 
 import config
 
