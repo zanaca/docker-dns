@@ -1,5 +1,4 @@
 import os
-import subprocess
 
 import config
 import dockerapi as docker
@@ -26,21 +25,13 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
 
     print('Uninstalling docker dns exposure')
     if docker.check_exists(name):
-        print("Removing existing container...")
+        print('Removing existing container...')
         docker.purge(name)
 
-    docker_daemon_file = f"{install.OS.DOCKER_CONF_FOLDER}/daemon.json"
+    docker_daemon_file = f'{install.OS.DOCKER_CONF_FOLDER}/daemon.json'
     if os.path.exists(docker_daemon_file):
         os.remove(docker_daemon_file)
 
-    resolvconf_head = '/etc/resolvconf/resolv.conf.d/head'
-    try:
-        lines = open(resolvconf_head).readlines()
-        original_lines = [line for line in lines if not line.endswith('docker-dns\n')]
-        open(resolvconf_head, 'w').writelines(original_lines)
-        subprocess.run(['resolvconf', '-u'])
-    except FileNotFoundError:
-        pass
+    uninstall_status = OS.uninstall(tld)
 
-    OS.uninstall(tld)
-    return 0
+    return uninstall_status
