@@ -1,3 +1,4 @@
 certs.d/tld/*
 .cache
+.idea
 __pycache__
