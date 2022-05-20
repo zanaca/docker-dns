@@ -24,7 +24,7 @@ def is_valid_ipv4_address(address):
 
 
 def get_dns_servers():
-    return dns.resolver.Resolver().nameservers
+    return dns.resolver.Resolver().nameservers + ['1.1.1.1', '8.8.8.8']
 
 
 def is_resolving_tld(tld=config.TOP_LEVEL_DOMAIN):
