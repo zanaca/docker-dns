@@ -4,6 +4,7 @@ import socket
 import platform
 import util
 import json
+import re
 
 
 APP = os.path.basename(sys.argv[0])
@@ -21,8 +22,8 @@ if util.on_macos or util.on_windows:
     NAME = platform.uname()[0]
 
 else:
-    NAME = open('/etc/os-release',
-                'r').read().split('NAME="')[1].split('"')[0]
+    NAME = re.search('(NAME=\")(\w+)\"', open('/etc/os-release',
+                'r').read()).group(2)
 
 if util.on_macos:
     VERSION_MAJOR_ID = '.'.join(platform.mac_ver()[0].split('.')[0:2])
