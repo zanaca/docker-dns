@@ -23,7 +23,7 @@ if util.on_macos or util.on_windows:
 
 else:
     NAME = re.search('NAME=\"(\w+)\"', open('/etc/os-release',
-                'r').read()).group(1)
+                                            'r').read()).group(1)
 
 if util.on_macos:
     VERSION_MAJOR_ID = '.'.join(platform.mac_ver()[0].split('.')[0:2])
@@ -36,7 +36,7 @@ elif util.on_windows or util.on_wsl:
     version = [VERSION_MAJOR_ID, 0]
 else:
     VERSION_MAJOR_ID = re.search('VERSION_ID=\"(\d+\.\d+)\"', open('/etc/os-release',
-                'r').read()).group(1)
+                                                                   'r').read()).group(1)
     version = VERSION_MAJOR_ID.split('.')
 
 if len(version) > 1:
