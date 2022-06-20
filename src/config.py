@@ -35,8 +35,8 @@ elif util.on_windows or util.on_wsl:
         f"{POWERSHELL_PATH} [Environment]::OSVersion.Version.Major").read().split('\n')[0]
     version = [VERSION_MAJOR_ID, 0]
 else:
-    VERSION_MAJOR_ID = open(
-        '/etc/os-release', 'r').read().split('VERSION_ID="')[1].split('"')[0]
+    VERSION_MAJOR_ID = re.search('VERSION_ID=\"(\d+\.\d+)\"', open('/etc/os-release',
+                'r').read()).group(1)
     version = VERSION_MAJOR_ID.split('.')
 
 if len(version) > 1:
