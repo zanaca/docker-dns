@@ -17,7 +17,7 @@ elif util.on_wsl:
     import OSes.windows_wsl2 as OS
 
 elif util.on_linux:
-    if config.NAME == 'Ubuntu':
+    if 'Ubuntu' in config.NAME:
         import OSes.ubuntu as OS
     elif config.NAME.lower() == 'linux mint':
         import OSes.mint as OS
@@ -50,7 +50,7 @@ def update_resolvconf():
                        f'nameserver 1.1.1.1 #cloudflare\n' \
                        f'nameserver 8.8.8.8 #google\n'
         options = 'options timeout:1 #@docker-dns\n'
-        if OS.FLAVOR == 'ubuntu' and config.OS_VERSION >= 18 * 1000:
+        if 'Ubuntu' in OS.FLAVOR and config.OS_VERSION >= 18 * 1000:
             open(RESOLVCONF_HEAD, 'a').write(name_servers)
             open(RESOLVCONF_TAIL, 'a').write(options)
             subprocess.run(['resolvconf', '-u'])
