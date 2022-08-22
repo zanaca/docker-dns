@@ -61,6 +61,13 @@ def main(name=config.DOCKER_CONTAINER_NAME, tag=config.DOCKER_CONTAINER_TAG, tld
     shutil.copy2(cert_file, OS.DOCKER_CONF_FOLDER)
     shutil.copy2(key_file, OS.DOCKER_CONF_FOLDER)
 
+    setup_status = OS.setup(tld)
+    if setup_status:
+        return setup_status
+
     install_status = OS.install(tld)
+    if install_status:
+        return install_status
+
     util.set_installed()
-    return install_status
+    return 0
