@@ -8,10 +8,7 @@ import re
 
 
 APP = os.path.basename(sys.argv[0])
-USER = os.environ.get('SUDO_USER')
-if not USER:
-    USER = os.environ.get('USER')
-
+USER = os.environ.get('SUDO_USER', 'USER')
 HOME = os.path.expanduser(f"~{USER}")
 HOME_ROOT = os.path.expanduser("~root")
 BASE_PATH = os.path.dirname(os.path.dirname(__file__))
