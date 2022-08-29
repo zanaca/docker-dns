@@ -1,14 +1,15 @@
-import platform
 import os
-from OpenSSL import crypto
+import platform
 import shutil
+
+from OpenSSL import crypto
 
 import config
 
 on_macos = platform.uname().system.lower() == 'darwin'
 on_windows = platform.uname().system.lower() == 'windows'
 on_linux = platform.uname().system.lower() == 'linux'
-on_wsl = on_linux and "microsoft" in platform.uname().release.lower()
+on_wsl = on_linux and 'microsoft' in platform.uname().release.lower()
 
 
 def is_supported():
@@ -16,29 +17,25 @@ def is_supported():
 
 
 def is_os_supported(os=None):
-    if not os or os not in config.SUPPORTED_OSES:
+    if not os or os not in config.SUPPORTED_OS_VERSIONS:
         return False
 
-    os_data = config.SUPPORTED_OSES[os]
-    min = os_data['min']
-    max = os_data['max']
-    if '.' not in min:
-        min += '.0'
-    if '.' not in max:
-        max += '.0'
-    min = min.split('.')
-    max = max.split('.')
+    os_major, os_minor, _ = f'{config.OS_VERSION}.0.0'.split('.', 2)
+    os_min_major, os_min_minor, _ = f'{config.SUPPORTED_OS_VERSIONS.get(os).get("min")}.0.0'.split('.', 2)
+    os_max_major, os_max_minor, _ = f'{config.SUPPORTED_OS_VERSIONS.get(os).get("max")}.0.0'.split('.', 2)
 
-    # if os in ['macos', 'ubuntu']:
-    min = int(min[1]) + int(min[0]) * 1000
-    max = int(max[1]) + int(max[0]) * 1000
-
-    if min > config.OS_VERSION:
-        print('WARNING: Your OS version is not supported.')
+    if int(os_major) < int(os_min_major) or \
+            int(os_major) == int(os_min_major) and int(os_minor) < int(os_min_minor):
+        print(f'ERROR: Your OS version is not supported.\n'
+              f'Minimun version: {config.SUPPORTED_OS_VERSIONS.get(os).get("min")}\n'
+              f'System version: {config.OS_VERSION}')
         return False
 
-    if max < config.OS_VERSION:
-        print('WARNING: Your OS is newer than the last tested version.')
+    if int(os_major) > int(os_max_major) or \
+            int(os_major) == int(os_max_major) and int(os_minor) > int(os_max_minor):
+        print(f'WARNING: Your OS is newer than the last tested version.\n'
+              f'Tested version: {config.SUPPORTED_OS_VERSIONS.get(os).get("max")}\n'
+              f'System version: {config.OS_VERSION}')
 
     return True
 
@@ -108,6 +105,10 @@ def generate_certificate(
 
 def check_if_installed():
     return os.path.exists(f'{config.BASE_PATH}/.cache/INSTALLED')
+
+
+def set_installed():
+    open(f'{config.BASE_PATH}/.cache/INSTALLED', 'w').write('')
 
 
 def remove_dir(base_path):

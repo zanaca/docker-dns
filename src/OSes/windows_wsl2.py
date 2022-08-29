@@ -1,12 +1,10 @@
 import os
 import shutil
+import sys
 import time
 
 import config
 import dockerapi as docker
-import util
-import network
-import tunnel
 
 FLAVOR = 'windows.wsl2'
 DOCKER_CONF_FOLDER = '/etc/docker'
@@ -98,13 +96,12 @@ rm /tmp/resolv.ddns
 
 
 def __get_windows_username():
-    return os.popen(
-        f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
+    return os.popen(f"{POWERSHELL_PATH} '$env:UserName'").read().split('\n')[0]
 
 
 def __generate_proxy_bat(ssh_port=None):
     if not ssh_port:
-        return False
+        return
 
     proxy_override = ''
     for a in range(1, 255):
@@ -131,6 +128,7 @@ reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Se
     file_name = file_name.replace('/mnt/c', 'C:').replace(' ', '\ ').replace('/', '\\\\')
     os.system(f'{CMD_PATH} /c {file_name} &')
 
+
 def __get_ssh_port():
     port = False
     ports = docker.get_exposed_port(config.DOCKER_CONTAINER_NAME)
@@ -140,7 +138,7 @@ def __get_ssh_port():
     return port
 
 
-def setup(tld=config.TOP_LEVEL_DOMAIN):
+def setup(tld=config.TOP_LEVEL_DOMAIN) -> int:
     if not os.path.isdir('/etc/resolver'):
         os.mkdir('/etc/resolver')
     open(f'/etc/resolver/{tld}',
@@ -168,10 +166,10 @@ def setup(tld=config.TOP_LEVEL_DOMAIN):
     #        ini = "\n".join(ini)
     # open(WSL_CONF, 'w').write(ini)
 
-    return True
+    return 0
 
 
-def install(tld=config.TOP_LEVEL_DOMAIN):
+def install(tld=config.TOP_LEVEL_DOMAIN) -> int:
     print('Generating known_hosts backup for user "root", if necessary')
     if not os.path.exists(f'{config.HOME_ROOT}/.ssh'):
         os.mkdir(f'{config.HOME_ROOT}/.ssh')
@@ -184,27 +182,30 @@ def install(tld=config.TOP_LEVEL_DOMAIN):
     time.sleep(3)
     port = __get_ssh_port()
     if not port:
-        raise('Problem fetching ssh port')
+        print('Problem fetching ssh port')
+        return 1
 
-    os.system(
-        f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
+    os.system(f'ssh-keyscan -H -t ecdsa-sha2-nistp256 -p {port} 127.0.0.1 2> /dev/null >> {KNOWN_HOSTS_FILE}')
 
     __generate_resolveconf()
 
     __generate_proxy_bat(ssh_port=port)
 
     # create etc/resolv.conf for
-    return True
+    original_arg = sys.argv
+    original_arg[1] = 'tunnel'
+    original_arg.append('&')
+    os.system(' '.join(original_arg))
+    return 0
 
 
-def uninstall(tld=config.TOP_LEVEL_DOMAIN):
+def uninstall(tld=config.TOP_LEVEL_DOMAIN) -> int:
     if os.path.exists(f'/etc/resolver/{tld}'):
         print('Removing resolver file')
         os.unlink(f'/etc/resolver/{tld}')
 
     ini = open(WSL_CONF, 'r').read()
-    ini = ini.replace('ngenerateResolvConf = false',
-                      'ngenerateResolvConf = true')
+    ini = ini.replace('ngenerateResolvConf = false', 'ngenerateResolvConf = true')
     open(WSL_CONF, 'w').write(ini)
 
     if os.path.exists(DNSMASQ_LOCAL_CONF):
@@ -214,8 +215,9 @@ def uninstall(tld=config.TOP_LEVEL_DOMAIN):
         print('Removing kwown_hosts backup')
         os.unlink(f'{config.HOME_ROOT}/.ssh/known_hosts_pre_docker-dns')
 
-    file_name = file_name.replace('[USERNAME]', __get_windows_username())
     file_name = f'{STARTUP_FOLDER_PATH}/docker-dns.bat'
     if os.path.exists(file_name):
         print('Removing bat file from Windows Startup folder')
         os.unlink(file_name)
+
+    return 0
