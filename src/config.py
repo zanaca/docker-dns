@@ -37,9 +37,13 @@ elif util.on_wsl:
     OS_VERSION = os.popen(f'{powershell_path} {version_path}').read().split(' ')[-1].replace('\n', '')
 
 else:
-    # OS_VERSION example: '20.04.1'
-    version_pattern = re.compile('~(.*)-')
-    OS_VERSION = re.search(pattern=version_pattern, string=platform.uname().version).group(1)
+    # OS_VERSION example: '20.04'
+    release_lines = open('/etc/os-release').readlines()
+    release_info = {
+        k.lower(): v.replace('"', '').replace('\n', '')
+        for k, v in [line.split('=') for line in release_lines]
+    }
+    OS_VERSION = release_info.get('version_id')
 
 OS = f'{HOSTUNAME}_{NAME}'
 TOP_LEVEL_DOMAIN = (util.read_cache('tld') or 'docker').strip()
